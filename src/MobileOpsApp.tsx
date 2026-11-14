@@ -1,11 +1,17 @@
 import { useEffect, useState, type ReactNode } from "react"
-import { api, type DashboardResponse, type UserRole } from "./lib/api"
+import {
+  api,
+  type DashboardResponse,
+  type User,
+  type UserRole,
+} from "./lib/api"
 import MobileLogin from "./MobileLogin"
 import { fallbackDashboard, type Screen } from "./mobile/data"
 import {
   DetailScreen,
   EquipmentScreen,
   HomeScreen,
+  ProfileScreen,
 } from "./mobile/screens/core"
 import { CalendarScreen } from "./mobile/screens/calendar"
 import {
@@ -16,10 +22,12 @@ import {
 import { AnomalyScreen, TelemetryScreen } from "./mobile/screens/monitoring"
 import { SupportScreen } from "./mobile/screens/support"
 import { NotificationsScreen } from "./mobile/screens/notifications"
+import NpmSecurityGuide from "./NpmSecurityGuide"
 
 const screenIds: Screen[] = [
   "login",
   "home",
+  "profile",
   "equipment",
   "detail",
   "calendar",
@@ -30,7 +38,16 @@ const screenIds: Screen[] = [
   "anomaly",
   "support",
   "notifications",
+  "security",
 ]
+
+const unauthenticatedUser: User = {
+  id: "",
+  name: "",
+  company: "",
+  phone: "",
+  role: "renter",
+}
 
 function getScreenFromHash(): Screen {
   const hash = window.location.hash.replace(/^#\/?/, "") as Screen
@@ -43,13 +60,7 @@ export default function MobileOpsApp({ onBackToWebsite }: {
   const [screen, setScreen] = useState<Screen>(getScreenFromHash)
   const [session, setSession] = useState<{
     message: string
-    user: {
-      id: string
-      role: UserRole
-      phone: string
-      name: string
-      company: string
-    }
+    user: User
     session: {
       token: string
       role: UserRole
@@ -102,13 +113,7 @@ export default function MobileOpsApp({ onBackToWebsite }: {
 
   const handleLogin = (result: {
     message: string
-    user: {
-      id: string
-      role: UserRole
-      phone: string
-      name: string
-      company: string
-    }
+    user: User
     session: {
       token: string
       role: UserRole
@@ -127,7 +132,26 @@ export default function MobileOpsApp({ onBackToWebsite }: {
   }
 
   if (screen === "login") {
-    return <MobileLogin onLogin={handleLogin} />
+    return (
+      <MobileLogin onBackToWebsite={onBackToWebsite} onLogin={handleLogin} />
+    )
+  }
+
+  if (screen === "security") {
+    if (session?.user.role !== "manager" && session?.user.role !== "fixer") {
+      return (
+        <HomeScreen
+          dashboard={dashboard}
+          onBackToWebsite={onBackToWebsite}
+          onNavigate={navigate}
+          onSignOut={handleSignOut}
+          role={session?.user.role ?? "renter"}
+          user={session?.user ?? unauthenticatedUser}
+        />
+      )
+    }
+
+    return <NpmSecurityGuide onBack={() => navigate("home")} />
   }
 
   const screens: Record<Exclude<Screen, "login">, ReactNode> = {
@@ -138,7 +162,13 @@ export default function MobileOpsApp({ onBackToWebsite }: {
         onNavigate={navigate}
         onSignOut={handleSignOut}
         role={session?.user.role ?? "manager"}
+        user={session?.user ?? unauthenticatedUser}
       />
+    ),
+    profile: session ? (
+      <ProfileScreen user={session.user} onNavigate={navigate} />
+    ) : (
+      <MobileLogin onBackToWebsite={onBackToWebsite} onLogin={handleLogin} />
     ),
     equipment: <EquipmentScreen dashboard={dashboard} onNavigate={navigate} />,
     detail: <DetailScreen dashboard={dashboard} onNavigate={navigate} />,
@@ -152,6 +182,7 @@ export default function MobileOpsApp({ onBackToWebsite }: {
     notifications: (
       <NotificationsScreen dashboard={dashboard} onNavigate={navigate} />
     ),
+    security: null,
   }
 
   return screens[screen]

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
-import type { DashboardResponse, UserRole } from "../../lib/api"
+import type { DashboardResponse, User, UserRole } from "../../lib/api"
+import { rentalCategories, rentalCategoryIcons } from "../../rentalCatalog"
 import { fallbackDashboard, type Screen } from "../data"
 import {
   Card,
@@ -17,16 +18,18 @@ export function HomeScreen({
   onSignOut,
   onBackToWebsite,
   role,
+  user,
 }: {
   dashboard: DashboardResponse
   onNavigate: (screen: Screen) => void
   onSignOut: () => void
   onBackToWebsite?: () => void
   role: UserRole
+  user: User
 }) {
   const summary = dashboard.summary
   const roleLabel =
-    role === "manager" ? "Менежер" : role === "fixer" ? "Фиксер" : "Түрээслэгч"
+    role === "manager" ? "Менежер" : role === "fixer" ? "Засварчин" : "Түрээслэгч"
   const roleGreeting =
     role === "manager"
       ? "Тайлангийн тойм"
@@ -37,31 +40,46 @@ export function HomeScreen({
   return (
     <MobilePage current="home" onNavigate={onNavigate}>
       <Header
+        actionPosition="end"
+        titleAlignment="left"
+        titleAdornment={
+          <button
+            aria-label="Миний профайл"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#e2f1f7] font-['Inter:Bold'] text-[12px] font-bold text-[#1677a8]"
+            onClick={() => onNavigate("profile")}
+            title="Миний профайл"
+            type="button"
+          >
+            {user.name.trim().charAt(0).toUpperCase() || "?"}
+          </button>
+        }
         action={
           <div className="flex items-center gap-2">
-            <button
-              className="rounded-full border border-[#dce4e8] bg-[#f8fafb] px-2 py-1 font-['Inter:Bold'] text-[9px] font-bold text-[#42515d]"
-              onClick={() => onNavigate("home")}
-              type="button"
-            >
-              Буцах
-            </button>
-            {onBackToWebsite && (
+            <div className="flex items-center gap-2">
               <button
-                className="rounded-full border border-[#dce4e8] bg-[#edf7ff] px-2 py-1 font-['Inter:Bold'] text-[9px] font-bold text-[#1677a8]"
-                onClick={onBackToWebsite}
+                className="rounded-full border border-[#dce4e8] bg-[#f8fafb] px-2 py-1 font-['Inter:Bold'] text-[9px] font-bold text-[#42515d]"
+                onClick={() => onNavigate("home")}
                 type="button"
               >
-                Website
+                Буцах
               </button>
-            )}
-            <button
-              className="rounded-full border border-[#dce4e8] bg-[#f3f7f8] px-2 py-1 font-['Inter:Bold'] text-[9px] font-bold text-[#42515d]"
-              onClick={onSignOut}
-              type="button"
-            >
-              Гарах
-            </button>
+              {onBackToWebsite && (
+                <button
+                  className="rounded-full border border-[#dce4e8] bg-[#edf7ff] px-2 py-1 font-['Inter:Bold'] text-[9px] font-bold text-[#1677a8]"
+                  onClick={onBackToWebsite}
+                  type="button"
+                >
+                  Вэбсайтын нүүр хуудас
+                </button>
+              )}
+              <button
+                className="rounded-full border border-[#dce4e8] bg-[#f3f7f8] px-2 py-1 font-['Inter:Bold'] text-[9px] font-bold text-[#42515d]"
+                onClick={onSignOut}
+                type="button"
+              >
+                Гарах
+              </button>
+            </div>
             <button
               aria-label="Мэдэгдэл"
               className="relative flex size-9 items-center justify-center rounded-full bg-[#f2f5f7]"
@@ -73,8 +91,8 @@ export function HomeScreen({
             </button>
           </div>
         }
-        subtitle="2026.10.04 · Талбай 12"
-        title={`Өглөөний мэнд, ${roleLabel}`}
+        subtitle={`${user.company} · ${summary.siteName}`}
+        title={`Өдрийн мэнд, ${roleLabel}`}
       />
       <div className="flex flex-1 flex-col gap-3 p-3">
         <div className="grid grid-cols-3 gap-2">
@@ -162,13 +180,13 @@ export function HomeScreen({
             </span>
           </button>
           <button
-            className="flex h-[64px] items-center gap-3 rounded-[10px] bg-white p-3 text-left"
+            className="home-notifications-shortcut flex h-[64px] items-center gap-3 rounded-[10px] border border-[#dce4e8] bg-[#f3f7f8] p-3 text-left text-[#14212a]"
             onClick={() =>
               onNavigate(role === "fixer" ? "support" : "notifications")
             }
             type="button"
           >
-            <Icon className="size-6" src={icons.send} />
+            <Icon className="size-6 brightness-0 opacity-70" src={icons.send} />
             <span className="font-['Inter:Bold'] text-[11px] font-bold">
               {role === "fixer" ? "Тусламж" : "Мэдэгдэл"}
             </span>
@@ -197,7 +215,73 @@ export function HomeScreen({
               Үргэлжлүүлэх
             </button>
           </div>
+          {(role === "manager" || role === "fixer") && (
+            <button
+              className="rounded-[10px] border border-[#dce4e8] bg-white p-3 text-left font-['Inter:Bold'] text-[11px] font-bold text-[#42515d]"
+              onClick={() => onNavigate("security")}
+              type="button"
+            >
+              npm security
+            </button>
+          )}
         </div>
+      </div>
+    </MobilePage>
+  )
+}
+
+export function ProfileScreen({
+  user,
+  onNavigate,
+}: {
+  user: User
+  onNavigate: (screen: Screen) => void
+}) {
+  const roleLabel =
+    user.role === "manager"
+      ? "Менежер"
+      : user.role === "fixer"
+        ? "Засварчин"
+        : "Түрээслэгч"
+  const profileFields = [
+    ["Бүтэн нэр", user.name],
+    ["Бүртгэлийн төрөл", roleLabel],
+    ["Байгууллага", user.company],
+    ["Утасны дугаар", user.phone],
+    ["Имэйл хаяг", user.email],
+    ["Хэрэглэгчийн дугаар", user.id],
+  ]
+
+  return (
+    <MobilePage current="profile" onNavigate={onNavigate}>
+      <Header
+        onBack={() => onNavigate("home")}
+        subtitle="Бүртгэлтэй мэдээлэл"
+        title="Миний профайл"
+      />
+      <div className="flex flex-1 flex-col gap-4 p-4">
+        <Card className="flex items-center gap-4 p-4">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-[#e2f1f7] font-['Inter:Bold'] text-xl font-bold text-[#1677a8]">
+            {user.name.trim().charAt(0).toUpperCase() || "?"}
+          </div>
+          <div className="min-w-0">
+            <h2 className="truncate font-['Inter:Bold'] text-[16px] font-bold">
+              {user.name}
+            </h2>
+            <p className="mt-1 text-[11px] text-[#6c7c87]">{roleLabel}</p>
+          </div>
+        </Card>
+
+        <Card className="divide-y divide-[#edf1f3] px-4">
+          {profileFields.map(([label, value]) => (
+            <div className="py-3" key={label}>
+              <p className="text-[10px] text-[#7b8a94]">{label}</p>
+              <p className="mt-1 break-all font-['Inter:Bold'] text-[12px] font-bold text-[#14212a]">
+                {value || "Бүртгэгдээгүй"}
+              </p>
+            </div>
+          ))}
+        </Card>
       </div>
     </MobilePage>
   )
@@ -212,23 +296,22 @@ export function EquipmentScreen({
 }) {
   const [activeFilter, setActiveFilter] =
     useState<"all" | "ready" | "rented" | "alert">("all")
+  const [activeCategory, setActiveCategory] = useState("Бүгд")
   const equipment = dashboard.equipment ?? fallbackDashboard.equipment
 
   const filteredEquipment = useMemo(() => {
-    if (activeFilter === "all") {
-      return equipment
-    }
-
     return equipment.filter((item) => {
-      if (activeFilter === "ready") {
-        return item.status === "Бэлэн"
-      }
-      if (activeFilter === "rented") {
-        return item.status === "Түрээстэй"
-      }
-      return item.status === "Анхаарах" || item.status === "Засварт"
+      const matchesStatus =
+        activeFilter === "all" ||
+        (activeFilter === "ready" && item.status === "Бэлэн") ||
+        (activeFilter === "rented" && item.status === "Түрээстэй") ||
+        (activeFilter === "alert" &&
+          (item.status === "Анхаарах" || item.status === "Засварт"))
+      const matchesCategory =
+        activeCategory === "Бүгд" || item.category === activeCategory
+      return matchesStatus && matchesCategory
     })
-  }, [activeFilter, equipment])
+  }, [activeCategory, activeFilter, equipment])
 
   return (
     <MobilePage current="equipment" onNavigate={onNavigate}>
@@ -260,7 +343,38 @@ export function EquipmentScreen({
           </button>
         ))}
       </div>
+      <div
+        aria-label="Төхөөрөмжийн ангилал"
+        className="flex gap-2 overflow-x-auto border-b border-[#e4eaed] bg-white px-3 py-2"
+        role="group"
+      >
+        {["Бүгд", ...rentalCategories].map((category) => (
+          <button
+            aria-pressed={activeCategory === category}
+            className={`rounded-full px-3 py-1.5 text-[9px] whitespace-nowrap ${
+              activeCategory === category
+                ? "bg-[#e2f1f7] font-bold text-[#1677a8]"
+                : "bg-[#f3f6f7] text-[#5d6e79]"
+            }`}
+            key={category}
+            onClick={() => setActiveCategory(category)}
+            type="button"
+          >
+            {category !== "Бүгд" && (
+              <span aria-hidden="true" className="mr-1.5">
+                {rentalCategoryIcons[category]}
+              </span>
+            )}
+            {category}
+          </button>
+        ))}
+      </div>
       <div className="flex flex-1 flex-col gap-2 p-3">
+        {filteredEquipment.length === 0 && (
+          <p className="rounded-[10px] border border-dashed border-[#dce4e8] bg-white p-4 text-center text-[11px] text-[#6c7c87]">
+            Энэ ангилал, төлөвт тохирох төхөөрөмж алга.
+          </p>
+        )}
         {filteredEquipment.map((item, index) => (
           <button
             className="flex w-full items-center gap-3 rounded-[10px] border border-[#dce4e8] bg-white p-3 text-left"

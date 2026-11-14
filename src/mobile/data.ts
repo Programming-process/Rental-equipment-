@@ -1,6 +1,6 @@
 import type { DashboardResponse } from "../lib/api"
 
-export type Screen = "login" | "home" | "equipment" | "detail" | "calendar" | "scanner" | "checkout" | "checkin" | "telemetry" | "anomaly" | "support" | "notifications"
+export type Screen = "login" | "home" | "profile" | "equipment" | "detail" | "calendar" | "scanner" | "checkout" | "checkin" | "telemetry" | "anomaly" | "support" | "notifications" | "security"
 
 export const fallbackDashboard: DashboardResponse = {
   summary: {
@@ -14,6 +14,7 @@ export const fallbackDashboard: DashboardResponse = {
     {
       id: "DRL-UB-0247",
       name: "Өрмийн машин D45",
+      category: "Цахилгаан багаж",
       model: "Atlas Copco D45",
       status: "Түрээстэй",
       meta: "DRL-UB-0247",
@@ -27,6 +28,7 @@ export const fallbackDashboard: DashboardResponse = {
     {
       id: "GEN-0162",
       name: "Генератор 150 кВА",
+      category: "Үүсгүүр, компрессор, насос",
       model: "Cummins 150 kVA",
       status: "Бэлэн",
       meta: "GEN-0162",
@@ -40,6 +42,7 @@ export const fallbackDashboard: DashboardResponse = {
     {
       id: "MIX-4993",
       name: "Бетон зуурагч 8м³",
+      category: "Барилгын тоног төхөөрөмж",
       model: "MIX-8 PRO",
       status: "Анхаарах",
       meta: "MIX-4993",

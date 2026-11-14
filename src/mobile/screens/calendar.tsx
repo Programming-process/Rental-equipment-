@@ -1,13 +1,80 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import type { Screen } from "../data"
 import { Card, Header, MobilePage, StatusPill } from "../ui"
+
+const years = Array.from({ length: 10 }, (_, index) => 2026 + index)
+const firstYear = 2026
+const lastYear = 2035
+const months = [
+  "1-р сар",
+  "2-р сар",
+  "3-р сар",
+  "4-р сар",
+  "5-р сар",
+  "6-р сар",
+  "7-р сар",
+  "8-р сар",
+  "9-р сар",
+  "10-р сар",
+  "11-р сар",
+  "12-р сар",
+]
+const weekdays = ["НЯМ", "ДАВ", "МЯГ", "ЛХА", "ПҮР", "БАА", "БЯМ"]
+const timeOptions = Array.from({ length: 48 }, (_, index) => {
+  const hour = String(Math.floor(index / 2)).padStart(2, "0")
+  const minute = index % 2 === 0 ? "00" : "30"
+  return `${hour}:${minute}`
+})
+
+const formatDate = (date: Date) =>
+  `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`
 
 export function CalendarScreen({
   onNavigate,
 }: {
   onNavigate: (screen: Screen) => void
 }) {
-  const [selectedDay, setSelectedDay] = useState("09")
+  const [selectedYear, setSelectedYear] = useState(2026)
+  const [selectedMonth, setSelectedMonth] = useState(9)
+  const [selectedDay, setSelectedDay] = useState(9)
+  const [startTime, setStartTime] = useState("08:00")
+  const [endTime, setEndTime] = useState("18:00")
+  const [rentalDays, setRentalDays] = useState(1)
+
+  const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate()
+  const firstWeekday = new Date(selectedYear, selectedMonth, 1).getDay()
+  const selectedDate = new Date(selectedYear, selectedMonth, selectedDay)
+  const endDate = new Date(selectedDate)
+  endDate.setDate(endDate.getDate() + rentalDays)
+  const calendarDays = useMemo(
+    () => Array.from({ length: daysInMonth }, (_, index) => index + 1),
+    [daysInMonth],
+  )
+
+  const changeMonth = (offset: number) => {
+    const date = new Date(selectedYear, selectedMonth + offset, 1)
+    if (date.getFullYear() < firstYear || date.getFullYear() > lastYear) {
+      return
+    }
+
+    setSelectedYear(date.getFullYear())
+    setSelectedMonth(date.getMonth())
+    setSelectedDay((day) =>
+      Math.min(day, new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()),
+    )
+  }
+
+  const changeYear = (year: number) => {
+    setSelectedYear(year)
+    setSelectedDay((day) => Math.min(day, new Date(year, selectedMonth + 1, 0).getDate()))
+  }
+
+  const changeSelectedMonth = (month: number) => {
+    setSelectedMonth(month)
+    setSelectedDay((day) =>
+      Math.min(day, new Date(selectedYear, month + 1, 0).getDate()),
+    )
+  }
 
   return (
     <MobilePage current="calendar" onNavigate={onNavigate}>
@@ -18,39 +85,92 @@ export function CalendarScreen({
       />
       <div className="flex flex-1 flex-col gap-3 p-3">
         <Card className="p-3">
-          <div className="flex items-center justify-between">
-            <button className="rounded bg-[#f0f4f6] px-2 py-1" type="button">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <button
+              aria-label="Өмнөх сар"
+              className="rounded bg-[#f0f4f6] px-2 py-1"
+              disabled={selectedYear === firstYear && selectedMonth === 0}
+              onClick={() => changeMonth(-1)}
+              type="button"
+            >
               ‹
             </button>
-            <p className="font-['Inter:Bold'] text-[12px] font-bold">
-              2026 оны 10-р сар
-            </p>
-            <button className="rounded bg-[#f0f4f6] px-2 py-1" type="button">
+            <div className="flex items-center gap-2">
+              <label className="sr-only" htmlFor="booking-year">
+                Он сонгох
+              </label>
+              <select
+                className="rounded-lg border border-[#dce4e8] bg-white px-2 py-1 text-[11px] font-bold"
+                id="booking-year"
+                onChange={(event) => changeYear(Number(event.target.value))}
+                value={selectedYear}
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year} он
+                  </option>
+                ))}
+              </select>
+              <label className="sr-only" htmlFor="booking-month">
+                Сар сонгох
+              </label>
+              <select
+                className="rounded-lg border border-[#dce4e8] bg-white px-2 py-1 text-[11px] font-bold"
+                id="booking-month"
+                onChange={(event) =>
+                  changeSelectedMonth(Number(event.target.value))
+                }
+                value={selectedMonth}
+              >
+                {months.map((month, index) => (
+                  <option key={month} value={index}>
+                    {month}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              aria-label="Дараагийн сар"
+              className="rounded bg-[#f0f4f6] px-2 py-1"
+              disabled={selectedYear === lastYear && selectedMonth === 11}
+              onClick={() => changeMonth(1)}
+              type="button"
+            >
               ›
             </button>
           </div>
           <div className="mt-3 grid grid-cols-7 gap-1">
-            {["05", "06", "07", "08", "09", "10", "11"].map((day, index) => {
+            {weekdays.map((weekday) => (
+              <span
+                className="py-1 text-center text-[7px] text-[#7c8992]"
+                key={weekday}
+              >
+                {weekday}
+              </span>
+            ))}
+            {Array.from({ length: firstWeekday }, (_, index) => (
+              <span aria-hidden="true" key={`empty-${index}`} />
+            ))}
+            {calendarDays.map((day) => {
               const isSelected = selectedDay === day
 
               return (
                 <button
-                  className={`rounded-lg py-3 text-center ${
+                  aria-pressed={isSelected}
+                  className={`rounded-lg py-2 text-center ${
                     isSelected
                       ? "bg-[#1677a8] text-white"
-                      : index > 1 && index < 4
-                        ? "bg-[#fff1dc] text-[#b46b0f]"
-                        : "bg-[#f4f7f8]"
+                      : "bg-[#f4f7f8] text-[#14212a]"
                   }`}
                   key={day}
                   onClick={() => setSelectedDay(day)}
                   type="button"
                 >
-                  <span className="block text-[7px]">
-                    {["ДАВ", "МЯГ", "ЛХА", "ПҮР", "БАА", "БЯМ", "НЯМ"][index]}
+                  <span className="sr-only">
+                    {weekdays[new Date(selectedYear, selectedMonth, day).getDay()]}
                   </span>
-                  <span className="mt-1 block font-['Roboto_Mono:Bold'] text-[12px] font-bold">
-                    {day}
+                  <span className="block font-['Roboto_Mono:Bold'] text-[11px] font-bold">
+                    {String(day).padStart(2, "0")}
                   </span>
                 </button>
               )
@@ -58,26 +178,68 @@ export function CalendarScreen({
           </div>
         </Card>
         <Card className="p-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="font-['Inter:Bold'] text-[11px] font-bold">
               Сонгосон хугацаа
             </h2>
-            <StatusPill tone="green">3 өдөр</StatusPill>
+            <label className="flex items-center gap-2 text-[9px] text-[#5d6e79]">
+              Түрээслэх хоног
+              <select
+                aria-label="Түрээслэх хоног"
+                className="rounded-lg border border-[#dce4e8] bg-white px-2 py-1 font-bold"
+                onChange={(event) => setRentalDays(Number(event.target.value))}
+                value={rentalDays}
+              >
+                {[1, 2, 3, 7, 14, 30].map((days) => (
+                  <option key={days} value={days}>
+                    {days} өдөр
+                  </option>
+                ))}
+              </select>
+            </label>
+            <StatusPill tone="green">{rentalDays} өдөр</StatusPill>
           </div>
-          <div className="mt-3 flex items-center justify-between rounded-lg bg-[#f3f7f8] p-3">
-            <div>
-              <p className="text-[8px] text-[#7c8992]">ЭХЛЭХ</p>
-              <p className="font-['Roboto_Mono:Bold'] text-[13px] font-bold">
-                10.{selectedDay} · 08:00
-              </p>
-            </div>
-            <span className="text-[#1677a8]">→</span>
-            <div className="text-right">
-              <p className="text-[8px] text-[#7c8992]">ДУУСАХ</p>
-              <p className="font-['Roboto_Mono:Bold'] text-[13px] font-bold">
-                10.{String(Number(selectedDay) + 1).padStart(2, "0")} · 18:00
-              </p>
-            </div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <label className="rounded-lg bg-[#f3f7f8] p-3">
+              <span className="block text-[8px] text-[#7c8992]">ЭХЛЭХ</span>
+              <span className="mt-1 flex flex-wrap items-center justify-between gap-2">
+                <span className="font-['Roboto_Mono:Bold'] text-[12px] font-bold">
+                  {formatDate(selectedDate)}
+                </span>
+                <select
+                  aria-label="Эхлэх цаг"
+                  className="rounded border border-[#dce4e8] bg-white px-2 py-1 text-[10px]"
+                  onChange={(event) => setStartTime(event.target.value)}
+                  value={startTime}
+                >
+                  {timeOptions.map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            </label>
+            <label className="rounded-lg bg-[#f3f7f8] p-3 text-right">
+              <span className="block text-[8px] text-[#7c8992]">ДУУСАХ</span>
+              <span className="mt-1 flex flex-wrap items-center justify-end gap-2">
+                <span className="font-['Roboto_Mono:Bold'] text-[12px] font-bold">
+                  {formatDate(endDate)}
+                </span>
+                <select
+                  aria-label="Дуусах цаг"
+                  className="rounded border border-[#dce4e8] bg-white px-2 py-1 text-[10px]"
+                  onChange={(event) => setEndTime(event.target.value)}
+                  value={endTime}
+                >
+                  {timeOptions.map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            </label>
           </div>
         </Card>
         <Card className="p-3">

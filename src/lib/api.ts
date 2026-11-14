@@ -10,6 +10,7 @@ export type User = {
   id: string;
   role: UserRole;
   phone: string;
+  email?: string;
   name: string;
   company: string;
 };
@@ -17,6 +18,7 @@ export type User = {
 export type EquipmentItem = {
   id: string;
   name: string;
+  category?: string;
   model: string;
   status: string;
   meta: string;
@@ -83,8 +85,37 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
 
 export const api = {
   health: () => request<{ status: string; service: string; time: string }>('/health'),
-  login: (payload: { role: UserRole; phone: string; code: string }) =>
+  register: (payload: {
+    name: string;
+    company: string;
+    phone: string;
+    email: string;
+    password: string;
+  }) =>
+    request<{ message: string }>('/auth/register/request-code', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  verifyRegistrationCode: (payload: { email: string; code: string }) =>
+    request<{ message: string; user: User; session: Session }>(
+      '/auth/register/verify-code',
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      },
+    ),
+  login: (payload: { role: UserRole; email: string; password: string }) =>
     request<{ message: string; user: User; session: Session }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  forgotPassword: (payload: { email: string }) =>
+    request<{ message: string }>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  resetPassword: (payload: { email: string; code: string; password: string }) =>
+    request<{ message: string }>('/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),

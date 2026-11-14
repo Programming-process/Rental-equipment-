@@ -37,14 +37,26 @@ export function Header({
   subtitle,
   onBack,
   action,
+  titleAdornment,
+  actionPosition = "end",
+  titleAlignment = "left",
 }: {
-  title: string
+  title: ReactNode
   subtitle?: string
   onBack?: () => void
   action?: ReactNode
+  titleAdornment?: ReactNode
+  actionPosition?: "start" | "end"
+  titleAlignment?: "left" | "right"
 }) {
+  const actionElement = action && (
+    <div className={actionPosition === "start" ? "order-first" : "order-last"}>
+      {action}
+    </div>
+  )
+
   return (
-    <header className="sticky top-0 z-20 flex min-h-[60px] items-center gap-3 border-b border-[#dce4e8] bg-white px-4 py-3">
+    <header className="sticky top-0 z-20 flex min-h-[60px] flex-wrap items-center gap-3 border-b border-[#dce4e8] bg-white px-4 py-3">
       {onBack && (
         <button
           aria-label="Буцах"
@@ -55,17 +67,29 @@ export function Header({
           <Icon src={icons.back} />
         </button>
       )}
-      <div className="min-w-0 flex-1">
-        <h1 className="truncate font-['Inter:Bold'] text-[16px] font-bold text-[#14212a]">
-          {title}
-        </h1>
+      {actionPosition === "start" && actionElement}
+      <div
+        className={`min-w-0 flex-1 ${
+          titleAlignment === "right" ? "text-right" : "text-left"
+        }`}
+      >
+        <div
+          className={`flex items-center gap-2 ${
+            titleAlignment === "right" ? "justify-end" : "justify-start"
+          }`}
+        >
+          <h1 className="truncate font-['Inter:Bold'] text-[16px] font-bold text-[#14212a]">
+            {title}
+          </h1>
+          {titleAdornment}
+        </div>
         {subtitle && (
           <p className="mt-0.5 truncate font-['Inter:Regular'] text-[9px] text-[#7b8a94]">
             {subtitle}
           </p>
         )}
       </div>
-      {action}
+      {actionPosition === "end" && actionElement}
     </header>
   )
 }
@@ -89,7 +113,7 @@ export function BottomNav({
   ]
 
   return (
-    <nav className="sticky bottom-0 z-20 grid h-[66px] grid-cols-4 border-t border-[#dce4e8] bg-white px-2">
+    <nav className="sticky bottom-0 z-20 grid h-[66px] grid-cols-4 border-t border-[#dce4e8] bg-white px-2 md:order-first md:top-0 md:bottom-auto md:h-14 md:border-t-0 md:border-b md:px-4">
       {items.map((item) => {
         const active =
           current === item.id ||
@@ -98,7 +122,7 @@ export function BottomNav({
 
         return (
           <button
-            className={`flex flex-col items-center justify-center gap-1 rounded-lg font-['Inter:Regular'] text-[9px] ${
+            className={`flex flex-col items-center justify-center gap-1 rounded-lg font-['Inter:Regular'] text-[9px] md:flex-row md:gap-2 md:text-sm ${
               active ? "bg-[#e8f4f9] text-[#1677a8]" : "text-[#7b8a94]"
             }`}
             key={item.id}
@@ -124,7 +148,7 @@ export function MobilePage({
   onNavigate: (screen: Screen) => void
 }) {
   return (
-    <main className="flex min-h-dvh w-full flex-col bg-[#eef2f4] font-['Inter:Regular'] text-[#14212a]">
+    <main className="mx-auto flex min-h-dvh w-full flex-col bg-[#eef2f4] font-['Inter:Regular'] text-[#14212a] md:my-8 md:min-h-[calc(100dvh-4rem)] md:max-w-7xl md:overflow-hidden md:rounded-2xl md:border md:border-[#dce4e8] md:bg-white md:shadow-[0_18px_48px_rgba(20,33,42,0.08)]">
       <div className="flex flex-1 flex-col">{children}</div>
       <BottomNav current={current} onNavigate={onNavigate} />
     </main>

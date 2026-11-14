@@ -17,11 +17,74 @@ describe("api client", () => {
   it.each([
     ["health", () => api.health(), "/api/health", "GET", undefined],
     [
+      "register",
+      () =>
+        api.register({
+          name: "Test User",
+          company: "Example Co",
+          phone: "99128044",
+          email: "test@example.com",
+          password: "secure-password",
+        }),
+      "/api/auth/register/request-code",
+      "POST",
+      {
+        name: "Test User",
+        company: "Example Co",
+        phone: "99128044",
+        email: "test@example.com",
+        password: "secure-password",
+      },
+    ],
+    [
+      "verify registration code",
+      () =>
+        api.verifyRegistrationCode({
+          email: "test@example.com",
+          code: "123456",
+        }),
+      "/api/auth/register/verify-code",
+      "POST",
+      { email: "test@example.com", code: "123456" },
+    ],
+    [
       "login",
-      () => api.login({ role: "manager", phone: "99128044", code: "123456" }),
+      () =>
+        api.login({
+          role: "renter",
+          email: "test@example.com",
+          password: "secure-password",
+        }),
       "/api/auth/login",
       "POST",
-      { role: "manager", phone: "99128044", code: "123456" },
+      {
+        role: "renter",
+        email: "test@example.com",
+        password: "secure-password",
+      },
+    ],
+    [
+      "forgot password",
+      () => api.forgotPassword({ email: "test@example.com" }),
+      "/api/auth/forgot-password",
+      "POST",
+      { email: "test@example.com" },
+    ],
+    [
+      "reset password",
+      () =>
+        api.resetPassword({
+          email: "test@example.com",
+          code: "123456",
+          password: "new-password",
+        }),
+      "/api/auth/reset-password",
+      "POST",
+      {
+        email: "test@example.com",
+        code: "123456",
+        password: "new-password",
+      },
     ],
     ["dashboard", () => api.getDashboard(), "/api/dashboard", "GET", undefined],
     ["equipment", () => api.getEquipment(), "/api/equipment", "GET", undefined],

@@ -97,6 +97,11 @@
     background: #f1f4f6;
   }
 
+  html[data-theme="dark"] {
+    background: #0b1220;
+    color-scheme: dark;
+  }
+
   body {
     margin: 0;
     min-width: 320px;
@@ -111,4 +116,174 @@
   #root {
     min-height: 100dvh;
   }
+}
+
+.dark-mode {
+  background-color: #0b1220 !important;
+  color: #e5e7eb;
+  color-scheme: dark;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.dark-mode [class~="bg-white"],
+.dark-mode [class*="bg-[#f3f1ec]"],
+.dark-mode [class*="bg-[#eef2f4]"],
+.dark-mode [class*="bg-[#f8f9f6]"],
+.dark-mode [class*="bg-[#f6f8f9]"],
+.dark-mode [class~="bg-slate-50"],
+.dark-mode [class~="bg-gray-50"] {
+  background-color: #111827;
+}
+
+.dark-mode [class*="bg-[#fff3f2]"],
+.dark-mode [class*="bg-[#fbe7e5]"],
+.dark-mode [class*="bg-[#fff1f0]"],
+.dark-mode [class*="bg-[#fff0ef]"] {
+  background-color: #3b1d24;
+}
+
+.dark-mode [class*="bg-[#fff2dd]"],
+.dark-mode [class*="bg-[#fff4df]"] {
+  background-color: #3a2a14;
+}
+
+.dark-mode [class*="bg-[#e3f3ec]"] {
+  background-color: #123528;
+}
+
+.dark-mode [class*="bg-[#e2f1f7]"],
+.dark-mode [class*="bg-[#e8f4f9]"],
+.dark-mode [class*="bg-[#edf6f9]"],
+.dark-mode [class*="bg-[#edf7ff]"] {
+  background-color: #123047;
+}
+
+.dark-mode [class*="bg-[#eef2f4]"],
+.dark-mode [class*="bg-[#f2f5f7]"],
+.dark-mode [class*="bg-[#f0f4f6]"],
+.dark-mode [class*="bg-[#f1f4f6]"],
+.dark-mode [class*="bg-[#f3f6f7]"],
+.dark-mode [class*="bg-[#f3f7f8]"],
+.dark-mode [class*="bg-[#f4f7f8]"],
+.dark-mode [class*="bg-[#f8fafb]"],
+.dark-mode [class*="bg-[#f6f8f9]"],
+.dark-mode [class*="bg-[#edf1f3]"] {
+  background-color: #1e293b;
+}
+
+.dark-mode [class*="text-[#101820]"],
+.dark-mode [class*="text-[#14212a]"],
+.dark-mode [class~="text-gray-900"],
+.dark-mode [class~="text-slate-900"] {
+  color: #e5e7eb;
+}
+
+.dark-mode [class*="text-[#6c7c87]"],
+.dark-mode [class*="text-[#7b8a94]"],
+.dark-mode [class*="text-[#7b8992]"],
+.dark-mode [class*="text-[#74838d]"],
+.dark-mode [class*="text-[#82909a]"],
+.dark-mode [class*="text-[#758690]"],
+.dark-mode [class*="text-[#7c8a93]"],
+.dark-mode [class*="text-[#5d6e79]"],
+.dark-mode [class*="text-[#42515d]"] {
+  color: #b6c3d1;
+}
+
+.dark-mode [class*="text-[#8a5c59]"] {
+  color: #fca5a5;
+}
+
+.dark-mode [class*="text-[#8a5b58]"],
+.dark-mode [class*="text-[#a36518]"],
+.dark-mode [class*="text-[#c27a19]"] {
+  color: #fcd9a5;
+}
+
+.dark-mode [class*="text-[#c53c36]"] {
+  color: #fca5a5;
+}
+
+.dark-mode [class*="text-[#238a62]"] {
+  color: #6ee7b7;
+}
+
+.dark-mode [class*="text-[#1677a8]"] {
+  color: #7dd3fc;
+}
+
+.dark-mode [class*="text-[#bd7111]"] {
+  color: #fbbf24;
+}
+
+.dark-mode [class*="text-[#d8463e]"] {
+  color: #fca5a5;
+}
+
+.dark-mode [class*="border-[#dfe3"],
+.dark-mode [class*="border-[#e6e8"],
+.dark-mode [class*="border-[#d6dfe4]"],
+.dark-mode [class*="border-[#dce4e8]"],
+.dark-mode [class*="border-[#e4eaed]"],
+.dark-mode [class*="border-[#edf1f3]"] {
+  border-color: #334155;
+}
+
+.dark-mode [class*="border-[#e98781]"],
+.dark-mode [class*="border-[#e18883]"],
+.dark-mode [class*="border-[#e87973]"] {
+  border-color: #7f3b43;
+}
+
+.dark-mode [class*="border-[#f0cf94]"] {
+  border-color: #705222;
+}
+
+.dark-mode .login-form {
+  background-color: #fff;
+  border-color: #fff;
+  color: #14212a;
+  color-scheme: light;
+}
+
+.dark-mode .login-form [class*="text-[#101820]"],
+.dark-mode .login-form [class*="text-[#14212a]"] {
+  color: #14212a;
+}
+
+.dark-mode .login-form .login-role-option[aria-pressed="true"] {
+  border-color: #1677a8;
+  background-color: #e2f1f7;
+  color: #14212a;
+}
+
+.dark-mode .login-form .login-role-option:not([aria-pressed="true"]) {
+  border-color: #d6dfe4;
+  background-color: #f6f8f9;
+  color: #667784;
+}
+
+.dark-mode .login-form .login-company-option[aria-pressed="true"] {
+  border-color: #1677a8;
+  background-color: #e2f1f7;
+  color: #14212a;
+}
+
+.dark-mode .login-form .login-company-option:not([aria-pressed="true"]) {
+  border-color: #d6dfe4;
+  background-color: #f6f8f9;
+  color: #667784;
+}
+
+.dark-mode .home-notifications-shortcut {
+  border-color: #334155;
+  background-color: #111827;
+  color: #e5e7eb;
+}
+
+.dark-mode .home-notifications-shortcut img {
+  filter: brightness(0) invert(1);
+  opacity: 1;
 }

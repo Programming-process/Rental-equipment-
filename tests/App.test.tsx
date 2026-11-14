@@ -3,15 +3,76 @@ import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import App from "../src/App"
 import { api } from "../src/lib/api"
+import { rentalCatalog } from "../src/rentalCatalog"
 
 afterEach(() => {
   cleanup()
+  window.localStorage.removeItem("rent-theme")
+  delete document.documentElement.dataset.theme
 })
 
 // Үндсэн веб хуудсаас бусад хэсэг рүү шилжих, буцаж ирэх урсгалыг шалгана.
 describe("App routes", () => {
-  // Нүүр хуудас, npm аюулгүй байдлын хуудас хооронд зөв шилжиж байгааг шалгана.
-  it("renders the landing page and routes to the security guide and back", async () => {
+  it("uses a unique equipment illustration for every catalog item", () => {
+    const artwork = rentalCatalog.map((item) => item.image)
+
+    expect(artwork).toHaveLength(rentalCatalog.length)
+    expect(new Set(artwork).size).toBe(rentalCatalog.length)
+  })
+
+  it("toggles and persists night mode across the website and login", async () => {
+    const user = userEvent.setup()
+    window.history.replaceState(null, "", "/")
+    window.localStorage.removeItem("rent-theme")
+    render(<App />)
+
+    await user.click(
+      screen.getByRole("button", { name: "Шөнийн горимд шилжих" }),
+    )
+    expect(document.documentElement.dataset.theme).toBe("dark")
+    expect(window.localStorage.getItem("rent-theme")).toBe("dark")
+
+    await user.click(screen.getByRole("button", { name: "Нэвтрэх" }))
+    expect(document.querySelector(".login-form")).toHaveClass("bg-white")
+    expect(document.querySelector(".app-theme")).toHaveClass("dark-mode")
+
+    await user.click(
+      screen.getByRole("button", { name: "Өдрийн горимд шилжих" }),
+    )
+    expect(document.documentElement.dataset.theme).toBe("light")
+    expect(window.localStorage.getItem("rent-theme")).toBe("light")
+  })
+
+  it("lists the rental catalog with search and category filters", async () => {
+    const user = userEvent.setup()
+    window.history.replaceState(null, "", "/")
+    render(<App />)
+
+    expect(
+      screen.queryByRole("heading", { name: "Тоног төхөөрөмжийн бүх төрөл" }),
+    ).not.toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Бүгдийг харах" }))
+    expect(
+      screen.getByRole("heading", { name: "Тоног төхөөрөмжийн бүх төрөл" }),
+    ).toBeInTheDocument()
+    expect(screen.getAllByText(/Жишиг: ₮/).length).toBeGreaterThan(0)
+    expect(screen.getByText(/нэвтрэхгүйгээр харах боломжтой/)).toBeInTheDocument()
+    expect(screen.queryByText(/\$/)).not.toBeInTheDocument()
+
+    await user.selectOptions(
+      screen.getByLabelText("Төрлөөр шүүх"),
+      "Хүнд даацын машин механизм",
+    )
+    expect(screen.getByText("Экскаватор")).toBeInTheDocument()
+    expect(screen.queryByText("Цахилгаан өрмийн машин")).not.toBeInTheDocument()
+
+    await user.type(screen.getByLabelText("Тоног төхөөрөмж хайх"), "мини")
+    expect(screen.getByText("Мини экскаватор")).toBeInTheDocument()
+    expect(screen.queryByText("Экскаватор")).not.toBeInTheDocument()
+  })
+
+  // Нийтийн нүүр болон каталогт аюулгүй байдлын дотоод хуудсыг харуулахгүй.
+  it("renders a public landing page without exposing the security guide", async () => {
     const user = userEvent.setup()
     window.history.replaceState(null, "", "/")
     render(<App />)
@@ -19,25 +80,17 @@ describe("App routes", () => {
     expect(
       screen.getByRole("heading", { name: /Ажлын талбарын хүн/ }),
     ).toBeInTheDocument()
-    await user.click(screen.getByRole("button", { name: "npm security" }))
     expect(
-      screen.getByRole("heading", {
-        name: /Secure every step of your npm supply chain/,
-      }),
-    ).toBeInTheDocument()
-
-    await user.click(screen.getByRole("button", { name: "Back to dashboard" }))
+      screen.queryByRole("button", { name: "npm security" }),
+    ).not.toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Тоног төхөөрөмж" }))
     expect(
-      screen.getByRole("heading", { name: /Ажлын талбарын хүн/ }),
-    ).toBeInTheDocument()
-    await user.click(screen.getByRole("button", { name: "Вэбсайт" }))
-    expect(
-      screen.getByRole("heading", { name: /Ажлын талбарын хүн/ }),
-    ).toBeInTheDocument()
+      screen.queryByRole("button", { name: "npm security" }),
+    ).not.toBeInTheDocument()
   })
 
-  // Утасны апп руу орж нэвтэрсний дараа веб хуудсанд буцаж байгааг шалгана.
-  it("opens the mobile app and returns to the landing page", async () => {
+  // Веб порталаас нэвтэрч, нүүр хуудас руу буцаж байгааг шалгана.
+  it("opens the website portal and returns to the landing page", async () => {
     const user = userEvent.setup()
     window.history.replaceState(null, "", "/")
     vi.spyOn(api, "login").mockResolvedValue({
@@ -70,18 +123,40 @@ describe("App routes", () => {
     })
     render(<App />)
 
-    await user.click(screen.getByRole("button", { name: "Утас" }))
+    await user.click(screen.getByRole("button", { name: "Нэвтрэх" }))
     expect(
-      screen.getByRole("heading", { name: "Хэрэглэгчийн төрөл" }),
+      screen.getByRole("heading", { name: "Түрээслэгчийн нэвтрэх" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: /^Менежер Тайлан/ }),
+    ).not.toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Ажилтан нэвтрэх" }))
+    expect(
+      screen.getByRole("button", { name: /^Менежер Тайлан/ }),
     ).toBeInTheDocument()
 
+    await user.click(screen.getByRole("button", { name: /^Менежер Тайлан/ }))
+    await user.type(screen.getByLabelText("Имэйл хаяг"), "manager@example.com")
+    await user.type(screen.getByLabelText("Нууц үг"), "secure-password")
     await user.click(screen.getByRole("button", { name: "Менежерээр нэвтрэх" }))
     await waitFor(() =>
       expect(
-        screen.getByRole("heading", { name: "Өглөөний мэнд, Менежер" }),
+        screen.getByRole("heading", { name: /Өдрийн мэнд, Менежер/ }),
       ).toBeInTheDocument(),
     )
-    await user.click(screen.getByRole("button", { name: "Website" }))
+    await user.click(screen.getByRole("button", { name: "npm security" }))
+    expect(
+      screen.getByRole("heading", {
+        name: /Secure every step of your npm supply chain/,
+      }),
+    ).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Back to dashboard" }))
+    expect(
+      screen.getByRole("heading", { name: /Өдрийн мэнд, Менежер/ }),
+    ).toBeInTheDocument()
+    await user.click(
+      screen.getByRole("button", { name: "Вэбсайтын нүүр хуудас" }),
+    )
     expect(
       screen.getByRole("heading", { name: /Ажлын талбарын хүн/ }),
     ).toBeInTheDocument()

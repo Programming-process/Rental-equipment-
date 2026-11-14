@@ -1,15 +1,30 @@
-import crypto from 'node:crypto';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import cors from 'cors';
 import express from 'express';
+import nodemailer from 'nodemailer';
+import pg from 'pg';
+import { registerAuthRoutes } from './auth-routes.mjs';
+import { createMemoryAuthStore, createPostgresAuthStore } from './auth-store.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const port = Number(process.env.PORT || 4000);
 const distPath = path.join(__dirname, '..', 'dist');
+const testMemoryStore =
+  process.env.NODE_ENV === 'test' && process.env.AUTH_TEST_MEMORY === 'true';
+const pool = testMemoryStore
+  ? null
+  : process.env.DATABASE_URL
+    ? new pg.Pool({ connectionString: process.env.DATABASE_URL })
+    : null;
+const authStore = testMemoryStore
+  ? createMemoryAuthStore()
+  : pool
+    ? createPostgresAuthStore(pool)
+    : null;
 
 app.disable('x-powered-by');
 app.use(cors());
@@ -19,6 +34,7 @@ const equipment = [
   {
     id: 'DRL-UB-0247',
     name: 'Өрмийн машин D45',
+    category: 'Цахилгаан багаж',
     model: 'Atlas Copco D45',
     status: 'Түрээстэй',
     meta: 'DRL-UB-0247',
@@ -32,6 +48,7 @@ const equipment = [
   {
     id: 'GEN-0162',
     name: 'Генератор 150 кВА',
+    category: 'Үүсгүүр, компрессор, насос',
     model: 'Cummins 150 kVA',
     status: 'Бэлэн',
     meta: 'GEN-0162',
@@ -45,6 +62,7 @@ const equipment = [
   {
     id: 'MIX-4993',
     name: 'Бетон зуурагч 8м³',
+    category: 'Барилгын тоног төхөөрөмж',
     model: 'MIX-8 PRO',
     status: 'Анхаарах',
     meta: 'MIX-4993',
@@ -58,6 +76,7 @@ const equipment = [
   {
     id: 'EXC-0914',
     name: 'Бага оврын экскаватор',
+    category: 'Хүнд даацын машин механизм',
     model: 'CAT 308E',
     status: 'Засварт',
     meta: 'EXC-0914',
@@ -71,6 +90,7 @@ const equipment = [
   {
     id: 'TLS-1318',
     name: 'Гар багаж / багц',
+    category: 'Цахилгаан багаж',
     model: 'Tool kit 12',
     status: 'Бэлэн',
     meta: 'TLS-1318',
@@ -154,7 +174,38 @@ const dashboard = {
   supportTeam,
 };
 
-const createToken = () => crypto.randomBytes(18).toString('hex');
+const smtpConfigured = Boolean(process.env.SMTP_USER && process.env.SMTP_PASS);
+const mailer = smtpConfigured
+  ? nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: Number(process.env.SMTP_PORT || 465),
+      secure: process.env.SMTP_SECURE !== 'false',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    })
+  : null;
+
+registerAuthRoutes(app, {
+  store: authStore ?? {
+    async createUser() {
+      throw new Error('DATABASE_URL is not configured');
+    },
+  },
+  sendVerificationCode: mailer
+    ? async (email, code, purpose) =>
+        mailer.sendMail({
+          from: process.env.SMTP_FROM || process.env.SMTP_USER,
+          to: email,
+          subject:
+            purpose === 'register'
+              ? 'Түрээс Ops бүртгэл баталгаажуулах код'
+              : 'Түрээс Ops нууц үг сэргээх код',
+          text: `Таны нэг удаагийн код: ${code}\n\nКод 10 минутын хугацаанд хүчинтэй бөгөөд 5 удаагийн оролдлоготой.\n\nХэрэв та энэ хүсэлтийг илгээгээгүй бол энэ имэйлийг үл тооно уу.`,
+        })
+    : undefined,
+});
 
 if (existsSync(distPath)) {
   app.use(express.static(distPath));
@@ -166,36 +217,6 @@ if (existsSync(distPath)) {
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'ops-backend', time: new Date().toISOString() });
-});
-
-app.post('/api/auth/login', (req, res) => {
-  const { role = 'employee', phone = '99128044', code = '123456' } = req.body ?? {};
-
-  const normalizedRole = role === 'tenant' ? 'renter' : role;
-  const normalizedPhone = String(phone).replace(/\D/g, '');
-  const validLogin = code === '123456' && normalizedPhone.length >= 7;
-
-  if (!validLogin) {
-    return res.status(401).json({ message: 'Нэвтрэх мэдээлэл буруу байна.' });
-  }
-
-  const user = {
-    id: `${normalizedRole}-${normalizedPhone}`,
-    role: normalizedRole,
-    phone: normalizedPhone,
-    name: normalizedRole === 'renter' ? 'Хөх Тэнгэр ХХК' : 'Тэмүүлэн',
-    company: normalizedRole === 'renter' ? 'Монкон ХХК' : 'Талбай 12',
-  };
-
-  return res.json({
-    message: 'Амжилттай нэвтэрлээ',
-    user,
-    session: {
-      token: createToken(),
-      role: normalizedRole,
-      expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-    },
-  });
 });
 
 app.get('/api/dashboard', (req, res) => {
@@ -236,6 +257,32 @@ app.post('/api/support', (req, res) => {
   });
 });
 
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Ops backend listening on http://0.0.0.0:${port}`);
+app.use((error, req, res, next) => {
+  console.error('API request failed', error);
+  if (res.headersSent) return next(error);
+  if (error.status === 400) {
+    return res.status(400).json({ message: 'Хүсэлтийн өгөгдөл буруу байна.' });
+  }
+  return res.status(500).json({ message: 'Серверийн алдаа гарлаа.' });
 });
+
+const startServer = async () => {
+  if (!authStore) {
+    throw new Error('DATABASE_URL is required to start the authentication service.');
+  }
+  if (!process.env.OTP_SECRET || process.env.OTP_SECRET.length < 32) {
+    throw new Error('OTP_SECRET must be configured with at least 32 characters.');
+  }
+  await authStore.initialize();
+  return app.listen(port, '0.0.0.0', () => {
+    console.log(`Ops backend listening on http://0.0.0.0:${port}`);
+  });
+};
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  startServer().catch(async (error) => {
+    console.error('Ops backend failed to start', error);
+    if (pool) await pool.end();
+    process.exitCode = 1;
+  });
+}

@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="760" viewBox="0 0 900 760" fill="none">
+  <defs>
+    <linearGradient id="background" x1="86" y1="62" x2="799" y2="708" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#36B5E5"/>
+      <stop offset=".52" stop-color="#0E75A8"/>
+      <stop offset="1" stop-color="#091A31"/>
+    </linearGradient>
+    <linearGradient id="phone" x1="351" y1="134" x2="584" y2="616" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#153750"/>
+      <stop offset="1" stop-color="#07111F"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="375" y1="181" x2="562" y2="560" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#102B43"/>
+      <stop offset="1" stop-color="#0A182A"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="192" y1="79" x2="688" y2="645" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#83E2FF" stop-opacity=".85"/>
+      <stop offset="1" stop-color="#1677A8" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="244" y="83" width="454" height="608" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="20"/>
+    </filter>
+  </defs>
+  <rect width="900" height="760" rx="38" fill="#F4F7F9"/>
+  <path d="M0 0h430L0 248V0Z" fill="#31A9D6"/>
+  <path d="M900 760H461l439-252v252Z" fill="#10132D"/>
+  <path d="m450 60 345 198v244L450 700 105 502V258L450 60Z" fill="url(#background)"/>
+  <path d="m450 85 315 181v219L450 666 135 485V266L450 85Z" stroke="#E8F7FF" stroke-opacity=".8" stroke-width="3"/>
+  <circle cx="456" cy="382" r="248" fill="url(#glow)" opacity=".34"/>
+  <ellipse cx="474" cy="649" rx="151" ry="25" fill="#061321" opacity=".48"/>
+  <g filter="url(#shadow)" opacity=".72">
+    <rect x="323" y="116" width="260" height="511" rx="39" fill="#020914"/>
+  </g>
+  <g transform="rotate(-3 452 376)">
+    <rect x="337" y="112" width="244" height="511" rx="36" fill="#07111D" stroke="#53D6FF" stroke-width="5"/>
+    <rect x="352" y="143" width="214" height="445" rx="23" fill="url(#screen)"/>
+    <rect x="420" y="125" width="78" height="8" rx="4" fill="#456174"/>
+    <circle cx="509" cy="129" r="5" fill="#1CB8ED"/>
+    <text x="371" y="174" fill="#BDEBFF" font-family="Arial,sans-serif" font-size="12" font-weight="700">RENTAL EQUIPMENT</text>
+    <text x="371" y="200" fill="#F4FBFF" font-family="Arial,sans-serif" font-size="18" font-weight="700">Түрээсийн хяналт</text>
+    <rect x="371" y="215" width="176" height="1" fill="#6BA7C2" opacity=".45"/>
+    <rect x="370" y="232" width="178" height="79" rx="12" fill="#153B57"/>
+    <text x="383" y="253" fill="#9DB8C8" font-family="Arial,sans-serif" font-size="10">Төхөөрөмжийн бэлэн байдал</text>
+    <path d="M387 289c17-17 26-4 40-20 13-14 24 11 39-2 12-10 21-7 32-19 9-9 22-4 35-18" stroke="#40D1FF" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="533" cy="230" r="4" fill="#86E9FF"/>
+    <rect x="370" y="328" width="82" height="73" rx="11" fill="#153B57"/>
+    <rect x="463" y="328" width="85" height="73" rx="11" fill="#153B57"/>
+    <text x="382" y="349" fill="#9DB8C8" font-family="Arial,sans-serif" font-size="9">Захиалгатай</text>
+    <text x="382" y="382" fill="#F6FCFF" font-family="Arial,sans-serif" font-size="25" font-weight="700">24</text>
+    <text x="475" y="349" fill="#9DB8C8" font-family="Arial,sans-serif" font-size="9">Бэлэн</text>
+    <text x="475" y="382" fill="#71E6C1" font-family="Arial,sans-serif" font-size="25" font-weight="700">86</text>
+    <rect x="370" y="418" width="178" height="62" rx="11" fill="#153B57"/>
+    <circle cx="391" cy="449" r="12" fill="#1F93C1"/>
+    <path d="M386 449h10m-5-5v10" stroke="#E8FAFF" stroke-width="2" stroke-linecap="round"/>
+    <text x="412" y="444" fill="#ECF8FF" font-family="Arial,sans-serif" font-size="10" font-weight="700">Экскаватор EXC-0914</text>
+    <text x="412" y="461" fill="#9DB8C8" font-family="Arial,sans-serif" font-size="9">Бэлэн · Улаанбаатар</text>
+    <rect x="370" y="492" width="178" height="62" rx="11" fill="#153B57"/>
+    <circle cx="391" cy="523" r="12" fill="#D68931"/>
+    <path d="M386 523h10m-5-5v10" stroke="#FFF5E7" stroke-width="2" stroke-linecap="round"/>
+    <text x="412" y="518" fill="#ECF8FF" font-family="Arial,sans-serif" font-size="10" font-weight="700">Генератор 150 кВА</text>
+    <text x="412" y="535" fill="#9DB8C8" font-family="Arial,sans-serif" font-size="9">Түрээстэй · 2 өдөр</text>
+  </g>
+  <g transform="rotate(-8 248 264)">
+    <rect x="148" y="218" width="174" height="92" rx="15" fill="#F6FCFF" fill-opacity=".95"/>
+    <circle cx="181" cy="264" r="17" fill="#D8F4FF"/>
+    <path d="M172 270v-13l9-7 9 7v13h-6v-8h-6v8h-6Z" fill="#1677A8"/>
+    <text x="207" y="256" fill="#5D7889" font-family="Arial,sans-serif" font-size="10">Талбайн байршил</text>
+    <text x="207" y="276" fill="#14212A" font-family="Arial,sans-serif" font-size="13" font-weight="700">Улаанбаатар</text>
+    <circle cx="299" cy="237" r="4" fill="#41C9A1"/>
+  </g>
+  <g transform="rotate(7 654 384)">
+    <rect x="579" y="336" width="174" height="98" rx="15" fill="#F6FCFF" fill-opacity=".95"/>
+    <text x="597" y="362" fill="#5D7889" font-family="Arial,sans-serif" font-size="10">Нийт түрээс</text>
+    <text x="597" y="388" fill="#14212A" font-family="Arial,sans-serif" font-size="22" font-weight="700">128</text>
+    <rect x="597" y="404" width="136" height="8" rx="4" fill="#D9EAF1"/>
+    <rect x="597" y="404" width="92" height="8" rx="4" fill="#20A5D4"/>
+  </g>
+  <g transform="rotate(-5 242 492)">
+    <rect x="147" y="455" width="173" height="77" rx="14" fill="#E8F7FC" fill-opacity=".94"/>
+    <path d="M171 503v-13h12v13m8 0v-23h12v23m8 0v-18h12v18m8 0v-29h12v29" stroke="#1688B5" stroke-width="7" stroke-linecap="round"/>
+    <text x="171" y="476" fill="#5D7889" font-family="Arial,sans-serif" font-size="9">7 хоногийн ашиглалт</text>
+  </g>
+</svg>

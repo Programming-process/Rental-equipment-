@@ -4,8 +4,9 @@ A React + Vite frontend paired with an Express API for an equipment operations d
 
 - website dashboard for desktop
 - phone/mobile operations flow
-- role-based login flows
-- backend mock API for auth and dashboard data
+- role-based login backed by persistent PostgreSQL accounts
+- Gmail email-code verification for registration and password recovery
+- mock dashboard data API
 
 ## Tech stack
 
@@ -13,23 +14,26 @@ A React + Vite frontend paired with an Express API for an equipment operations d
 - Vite 8
 - Tailwind CSS v4
 - Express 4
+- PostgreSQL (`pg`)
+- Nodemailer (Gmail SMTP)
 - Node.js
 
 ## Local development
 
 1. Install dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
-2. Start the app in development mode:
+2. Copy `.env.example` to `.env`, then set the Supabase `DATABASE_URL`, a random `OTP_SECRET` with at least 32 characters, and Gmail SMTP credentials. Use a Google App Password for `SMTP_PASS`, not your normal Gmail password.
+3. Start the app in development mode:
    ```bash
-   npm run dev
+   pnpm dev
    ```
-3. Open the frontend at the Vite URL shown in the terminal, usually:
+4. Open the frontend at the Vite URL shown in the terminal, usually:
    ```bash
    http://localhost:8443
    ```
-4. The Express API runs on:
+5. The Express API runs on:
    ```bash
    http://localhost:4000
    ```
@@ -97,17 +101,13 @@ Use Render with a Docker-based web service.
 - The app builds inside Docker with Node 22.
 - The Express server serves the built frontend and API on the same port.
 - Render can pull the repo from GitHub and deploy the container automatically.
+- Configure `DATABASE_URL`, `OTP_SECRET`, `SMTP_USER`, `SMTP_PASS`, and optionally `SMTP_FROM` in the Render dashboard.
 
 ## Environment variables
 
-Create a `.env` file locally if needed:
+Create a `.env` file from `.env.example`. The API creates its `users`, `auth_sessions`, and `email_verification_codes` tables in Supabase on startup.
 
-```bash
-PORT=10000
-NODE_ENV=production
-```
-
-Render injects the port automatically in some cases, but this app is configured to run on port `10000` for Docker compatibility.
+Verification codes expire after 10 minutes, allow up to five attempts, and can be re-requested once per minute. Passwords are stored as scrypt hashes; verification codes are stored as keyed hashes. Public registration creates renter accounts only.
 
 ## Project structure
 
@@ -121,11 +121,12 @@ vite.config.ts      # Vite config with API proxy for local dev
 render.yaml         # Render deployment configuration
 ```
 
-## Notes
+## Account registration and recovery
 
-- This is a mock operations app, not a production database-backed system.
-- The backend stores data in memory and resets when the container restarts.
-- For production, swap the in-memory data source for Postgres, MongoDB, or another persistent store.
+- New accounts enter a six-digit code emailed to the address they registered with before an account is created.
+- Forgot-password requests email a separate six-digit code; the user enters it with a new password.
+- Manager and fixer accounts must be provisioned by an administrator; public registration is restricted to renters.
+- The database stores account credentials, hashed session tokens, and short-lived verification challenges. Dashboard equipment data remains sample data.
 
 ##NOTES
 https://docs.google.com/document/d/164UiklNqHUOLI5gsAqDS3K1AqN24cn7iFNl82y-TWHQ/edit?tab=t.0

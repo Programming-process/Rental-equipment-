@@ -58,7 +58,13 @@ describe("Ops API", { concurrency: false }, () => {
     baseUrl = `http://127.0.0.1:${port}`
     server = spawn("node", ["server/index.mjs"], {
       cwd: process.cwd(),
-      env: { ...process.env, PORT: String(port) },
+      env: {
+        ...process.env,
+        NODE_ENV: "test",
+        AUTH_TEST_MEMORY: "true",
+        OTP_SECRET: "test-secret-with-more-than-32-characters",
+        PORT: String(port),
+      },
       stdio: ["ignore", "pipe", "pipe"],
     })
     server.stdout.setEncoding("utf8").on("data", (chunk) => {
@@ -86,149 +92,14 @@ describe("Ops API", { concurrency: false }, () => {
     assert.ok(Number.isFinite(Date.parse(data.time)))
   })
 
-  // Дэмжигдсэн эрхүүд болон хуучин tenant нэрийн шинэчлэлтийг шалгана.
-  for (const [role, expectedRole] of [
-    ["employee", "employee"],
-    ["manager", "manager"],
-    ["fixer", "fixer"],
-    ["renter", "renter"],
-    ["tenant", "renter"],
-  ]) {
-    it(`logs in with ${role} role and returns a matching session`, async () => {
-      const { response, data } = await requestJson(
-        "/api/auth/login",
-        jsonRequest({ role, phone: "99128044", code: "123456" }),
-      )
-
-      assert.equal(response.status, 200)
-      assert.equal(data.user.role, expectedRole)
-      assert.equal(data.session.role, expectedRole)
-      assert.equal(data.user.phone, "99128044")
-      assert.equal(data.user.id, `${expectedRole}-99128044`)
-      assert.equal(data.message, "Амжилттай нэвтэрлээ")
-    })
-  }
-
-  // Утасны дугаарын нийтлэг бичилтүүд цифрүүдийг зөв хэвшүүлж байгааг шалгана.
-  for (const phone of [
-    "99128044",
-    "+976 9912 8044",
-    "+976-9912-8044",
-    "(976) 9912-8044",
-    "976.9912.8044",
-    " 9912 8044 ",
-    "00976/9912/8044",
-    "+(976) 9912-8044",
-  ]) {
-    it(`normalizes phone formatting: ${phone}`, async () => {
-      const { response, data } = await requestJson(
-        "/api/auth/login",
-        jsonRequest({ role: "employee", phone, code: "123456" }),
-      )
-
-      const normalizedPhone = phone.replace(/\D/g, "")
-      assert.equal(response.status, 200)
-      assert.equal(data.user.phone, normalizedPhone)
-      assert.equal(data.user.id, `employee-${normalizedPhone}`)
-    })
-  }
-
-  // Буруу код эсвэл долоон цифр хүрэхгүй дугаараар нэвтрэхийг хориглоно.
-  for (const [name, credentials] of [
-    ["incorrect code", { role: "employee", phone: "99128044", code: "000000" }],
-    ["empty code", { role: "employee", phone: "99128044", code: "" }],
-    ["numeric code", { role: "employee", phone: "99128044", code: 123456 }],
-    ["six-digit phone", { role: "employee", phone: "123456", code: "123456" }],
-    ["empty phone", { role: "employee", phone: "", code: "123456" }],
-    [
-      "non-numeric phone",
-      { role: "employee", phone: "abcdefgh", code: "123456" },
-    ],
-    ["null phone", { role: "employee", phone: null, code: "123456" }],
-  ]) {
-    it(`rejects login with ${name}`, async () => {
-      const { response, data } = await requestJson(
-        "/api/auth/login",
-        jsonRequest(credentials),
-      )
-
-      assert.equal(response.status, 401)
-      assert.deepEqual(data, { message: "Нэвтрэх мэдээлэл буруу байна." })
-    })
-  }
-
-  // Хүсэлтийн талбарууд эсвэл бүхэлдээ бие орхигдсон үед үндсэн утга хэрэглэнэ.
-  for (const [name, options] of [
-    ["empty object", jsonRequest({})],
-    ["missing body", { method: "POST" }],
-  ]) {
-    it(`uses login defaults for ${name}`, async () => {
-      const { response, data } = await requestJson("/api/auth/login", options)
-
-      assert.equal(response.status, 200)
-      assert.equal(data.user.role, "employee")
-      assert.equal(data.user.phone, "99128044")
-      assert.equal(data.session.role, "employee")
-    })
-  }
-
-  it("uses the default phone number when it is omitted", async () => {
+  it("rejects the old fixed demo login", async () => {
     const { response, data } = await requestJson(
       "/api/auth/login",
-      jsonRequest({ role: "employee", code: "123456" }),
+      jsonRequest({ phone: "99128044", code: "123456" }),
     )
 
-    assert.equal(response.status, 200)
-    assert.equal(data.user.phone, "99128044")
-  })
-
-  it("returns a 36-character hexadecimal token and an expiry one hour ahead", async () => {
-    const beforeLogin = Date.now()
-    const { response, data } = await requestJson(
-      "/api/auth/login",
-      jsonRequest({ role: "manager", phone: "99128044", code: "123456" }),
-    )
-    const afterLogin = Date.now()
-    const expiresAt = Date.parse(data.session.expiresAt)
-
-    assert.equal(response.status, 200)
-    assert.match(data.session.token, /^[a-f0-9]{36}$/)
-    assert.ok(expiresAt >= beforeLogin + 60 * 60 * 1000)
-    assert.ok(expiresAt <= afterLogin + 60 * 60 * 1000)
-  })
-
-  it("creates a fresh session token for each successful login", async () => {
-    const credentials = jsonRequest({
-      role: "manager",
-      phone: "99128044",
-      code: "123456",
-    })
-    const first = await requestJson("/api/auth/login", credentials)
-    const second = await requestJson("/api/auth/login", credentials)
-
-    assert.equal(first.response.status, 200)
-    assert.equal(second.response.status, 200)
-    assert.notEqual(first.data.session.token, second.data.session.token)
-  })
-
-  it("uses the renter-specific display name and company", async () => {
-    const { data } = await requestJson(
-      "/api/auth/login",
-      jsonRequest({ role: "tenant", phone: "99128044", code: "123456" }),
-    )
-
-    assert.equal(data.user.name, "Хөх Тэнгэр ХХК")
-    assert.equal(data.user.company, "Монкон ХХК")
-  })
-
-  it("uses the standard display name and company for non-renter roles", async () => {
-    const { data } = await requestJson(
-      "/api/auth/login",
-      jsonRequest({ role: "manager", phone: "99128044", code: "123456" }),
-    )
-
-    assert.equal(data.user.name, "Тэмүүлэн")
-    assert.equal(data.user.company, "Талбай 12")
+    assert.equal(response.status, 400)
+    assert.equal(data.message, "Имэйл, нууц үгээ оруулна уу.")
   })
 
   it("returns the complete equipment list with unique identifiers", async () => {

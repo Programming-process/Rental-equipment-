@@ -19,7 +19,15 @@ import {
 
 const renderAtHash = (route: string) => {
   window.history.replaceState(null, "", `/#${route}`)
-  return render(<MobileOpsApp />)
+  const result = render(<MobileOpsApp />)
+  const email = screen.queryByLabelText("Имэйл хаяг")
+  const password = screen.queryByLabelText("Нууц үг")
+  if (email) fireEvent.change(email, { target: { value: "test@example.com" } })
+  if (password)
+    fireEvent.change(password, { target: { value: "secure-password" } })
+  const managerRole = screen.queryByRole("button", { name: /^Менежер Тайлан/ })
+  if (managerRole) fireEvent.click(managerRole)
+  return result
 }
 
 const equipmentCatalog: DashboardResponse["equipment"] = [
@@ -139,7 +147,8 @@ const renderAuthenticatedRoute = async (
   onBackToWebsite?: () => void,
 ) => {
   const user = userEvent.setup()
-  const roleLabel = role === "renter" ? "Түрээслэгч" : "Менежер"
+  const roleLabel =
+    role === "renter" ? "Түрээслэгч" : role === "fixer" ? "Засварчин" : "Менежер"
   vi.spyOn(api, "login").mockResolvedValue({
     message: "Welcome",
     user: {
@@ -148,6 +157,7 @@ const renderAuthenticatedRoute = async (
       phone: "99128044",
       name: roleLabel,
       company: "Example Co",
+      email: "test@example.com",
     },
     session: {
       token: "session-token",
@@ -158,16 +168,32 @@ const renderAuthenticatedRoute = async (
   vi.spyOn(api, "getDashboard").mockResolvedValue(dashboard)
   window.history.replaceState(null, "", "/#login")
   render(<MobileOpsApp onBackToWebsite={onBackToWebsite} />)
-
-  if (role === "renter") {
-    await user.click(
-      screen.getByRole("button", { name: /Түрээслэгч Гэрээ, төлбөр/ }),
-    )
+  if (role !== "renter") {
+    await user.click(screen.getByRole("button", { name: "Ажилтан нэвтрэх" }))
   }
+  await user.type(screen.getByLabelText("Имэйл хаяг"), "test@example.com")
+  await user.type(screen.getByLabelText("Нууц үг"), "secure-password")
+
   await user.click(
-    screen.getByRole("button", { name: `${roleLabel}ээр нэвтрэх` }),
+    screen.getByRole("button", {
+      name: new RegExp(
+        role === "renter"
+          ? "^Түрээслэгч Гэрээ"
+          : role === "fixer"
+            ? "^Засварчин Төхөөрөмж"
+            : "^Менежер Тайлан",
+      ),
+    }),
   )
-  await screen.findByRole("heading", { name: `Өглөөний мэнд, ${roleLabel}` })
+  await user.click(
+    screen.getByRole("button", {
+      name:
+        role === "fixer"
+          ? "Засварчнаар нэвтрэх"
+          : `${roleLabel}ээр нэвтрэх`,
+    }),
+  )
+  await screen.findByRole("heading", { name: `Өдрийн мэнд, ${roleLabel}` })
   await screen.findByText(String(dashboard.summary.totalEquipment))
   if (route !== "home") {
     window.history.replaceState(null, "", `/#${route}`)
@@ -188,7 +214,7 @@ afterEach(() => {
 describe("MobileOpsApp screens", () => {
   // Hash зам бүр тохирох дэлгэцээ харуулж байгааг шалгана.
   it.each([
-    ["home", "Өглөөний мэнд, Менежер"],
+    ["home", "Өдрийн мэнд, Менежер"],
     ["equipment", "Тоног төхөөрөмж"],
     ["detail", "Өрмийн машин D45"],
     ["calendar", "Захиалгын хуанли"],
@@ -208,7 +234,7 @@ describe("MobileOpsApp screens", () => {
   it("falls back to login for an unknown route", () => {
     renderAtHash("unknown-screen")
     expect(
-      screen.getByRole("heading", { name: "Хэрэглэгчийн төрөл" }),
+      screen.getByRole("heading", { name: "Түрээслэгчийн нэвтрэх" }),
     ).toBeInTheDocument()
   })
 
@@ -234,7 +260,7 @@ describe("MobileOpsApp screens", () => {
 
     expect(window.location.hash).toBe("#home")
     expect(
-      screen.getByRole("heading", { name: "Өглөөний мэнд, Менежер" }),
+      screen.getByRole("heading", { name: "Өдрийн мэнд, Менежер" }),
     ).toBeInTheDocument()
   })
 
@@ -264,12 +290,12 @@ describe("MobileOpsApp screens", () => {
     ).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Буцах" }))
     expect(
-      screen.getByRole("heading", { name: "Өглөөний мэнд, Менежер" }),
+      screen.getByRole("heading", { name: "Өдрийн мэнд, Менежер" }),
     ).toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: "Гарах" }))
     expect(
-      screen.getByRole("heading", { name: "Хэрэглэгчийн төрөл" }),
+      screen.getByRole("heading", { name: "Түрээслэгчийн нэвтрэх" }),
     ).toBeInTheDocument()
   })
 
@@ -294,10 +320,11 @@ describe("MobileOpsApp screens", () => {
     vi.spyOn(api, "getDashboard").mockRejectedValue(new Error("offline"))
     renderAtHash("login")
 
-    await user.click(screen.getByRole("button", { name: /Фиксер Төхөөрөмж/ }))
-    await user.click(screen.getByRole("button", { name: "Фиксерээр нэвтрэх" }))
+    await user.click(screen.getByRole("button", { name: "Ажилтан нэвтрэх" }))
+    await user.click(screen.getByRole("button", { name: /Засварчин Төхөөрөмж/ }))
+    await user.click(screen.getByRole("button", { name: "Засварчнаар нэвтрэх" }))
     expect(
-      await screen.findByRole("heading", { name: "Өглөөний мэнд, Фиксер" }),
+      await screen.findByRole("heading", { name: "Өдрийн мэнд, Засварчин" }),
     ).toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: "QR уншуулах" }))
@@ -306,7 +333,7 @@ describe("MobileOpsApp screens", () => {
     ).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Буцах" }))
     expect(
-      screen.getByRole("heading", { name: "Өглөөний мэнд, Фиксер" }),
+      screen.getByRole("heading", { name: "Өдрийн мэнд, Засварчин" }),
     ).toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: "Тусламж" }))
@@ -343,7 +370,7 @@ describe("MobileOpsApp screens", () => {
   // Эрхийн төрөл бүрийн мэндчилгээ болон товчлол ялгаатай харагдаж байгааг шалгана.
   it.each([
     ["manager", "Менежер", "Төхөөрөмжийн жагсаалт", "Мэдэгдэл"],
-    ["fixer", "Фиксер", "QR уншуулах", "Тусламж"],
+    ["fixer", "Засварчин", "QR уншуулах", "Тусламж"],
     ["renter", "Түрээслэгч", "Төхөөрөмжийн жагсаалт", "Мэдэгдэл"],
   ] as const)(
     "shows the %s home greeting and role-specific shortcuts",
@@ -367,16 +394,26 @@ describe("MobileOpsApp screens", () => {
       vi.spyOn(api, "getDashboard").mockRejectedValue(new Error("offline"))
       renderAtHash("login")
 
+      if (role !== "renter") {
+        await user.click(
+          screen.getByRole("button", { name: "Ажилтан нэвтрэх" }),
+        )
+      }
       await user.click(
         screen.getByRole("button", { name: new RegExp(`^${roleLabel} `) }),
       )
       await user.click(
-        screen.getByRole("button", { name: `${roleLabel}ээр нэвтрэх` }),
+        screen.getByRole("button", {
+          name:
+            role === "fixer"
+              ? "Засварчнаар нэвтрэх"
+              : `${roleLabel}ээр нэвтрэх`,
+        }),
       )
 
       expect(
         await screen.findByRole("heading", {
-          name: `Өглөөний мэнд, ${roleLabel}`,
+          name: `Өдрийн мэнд, ${roleLabel}`,
         }),
       ).toBeInTheDocument()
       expect(
@@ -431,6 +468,8 @@ describe("MobileOpsApp screens", () => {
     })
     renderAtHash("login")
 
+    await user.click(screen.getByRole("button", { name: "Ажилтан нэвтрэх" }))
+    await user.click(screen.getByRole("button", { name: /Менежер Тайлан/ }))
     await user.click(screen.getByRole("button", { name: "Менежерээр нэвтрэх" }))
 
     expect(
@@ -470,7 +509,7 @@ describe("MobileOpsApp screens", () => {
     await user.click(screen.getByRole("button", { name: "Буцах" }))
     await user.click(screen.getByRole("button", { name: "Буцах" }))
     expect(
-      screen.getByRole("heading", { name: "Өглөөний мэнд, Менежер" }),
+      screen.getByRole("heading", { name: "Өдрийн мэнд, Менежер" }),
     ).toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: "Төхөөрөмж" }))
@@ -603,7 +642,7 @@ describe("MobileOpsApp screens", () => {
     renderAtHash("notifications")
     await user.click(screen.getByRole("button", { name: "Буцах" }))
     expect(
-      screen.getByRole("heading", { name: "Өглөөний мэнд, Менежер" }),
+      screen.getByRole("heading", { name: "Өдрийн мэнд, Менежер" }),
     ).toBeInTheDocument()
   })
 
@@ -624,13 +663,37 @@ describe("MobileOpsApp screens", () => {
     ).toBeInTheDocument()
   })
 
+  it("filters equipment by catalog category while preserving the availability filter", async () => {
+    const user = userEvent.setup()
+    renderAtHash("equipment")
+
+    await user.click(
+      screen.getByRole("button", { name: "Үүсгүүр, компрессор, насос" }),
+    )
+    expect(screen.getByText("Генератор 150 кВА")).toBeInTheDocument()
+    expect(screen.queryByText("Өрмийн машин D45")).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Бэлэн 30" }))
+    expect(screen.getByText("Генератор 150 кВА")).toBeInTheDocument()
+    expect(
+      screen.queryByText("Энэ ангилал, төлөвт тохирох төхөөрөмж алга."),
+    ).not.toBeInTheDocument()
+
+    await user.click(
+      screen.getByRole("button", { name: "Хүнд даацын машин механизм" }),
+    )
+    expect(
+      screen.getByText("Энэ ангилал, төлөвт тохирох төхөөрөмж алга."),
+    ).toBeInTheDocument()
+  })
+
   // Хуанлид өдөр сонгоод олголтын дараагийн алхамд шилжинэ.
   it("updates the calendar selection and continues to checkout", async () => {
     const user = userEvent.setup()
     renderAtHash("calendar")
 
     await user.click(screen.getByRole("button", { name: /БЯМ\s*10/ }))
-    expect(screen.getByText("10.10 · 08:00")).toBeInTheDocument()
+    expect(screen.getByText("2026.10.10")).toBeInTheDocument()
 
     await user.click(
       screen.getByRole("button", { name: "Захиалга баталгаажуулах" }),
@@ -642,8 +705,8 @@ describe("MobileOpsApp screens", () => {
 
   // Өөр өдөр сонгоход түрээсийн эхлэх болон дуусах огноо шинэчлэгдэнэ.
   it.each([
-    ["05", "10.05 · 08:00", "10.06 · 18:00"],
-    ["11", "10.11 · 08:00", "10.12 · 18:00"],
+    ["05", "2026.10.05", "2026.10.06"],
+    ["11", "2026.10.11", "2026.10.12"],
   ])(
     "updates the selected rental start and end date for day %s",
     async (day, startDate, endDate) => {
@@ -660,6 +723,24 @@ describe("MobileOpsApp screens", () => {
       expect(screen.getByText(endDate)).toBeInTheDocument()
     },
   )
+
+  it("allows choosing a booking year, month, duration, and start/end times", async () => {
+    const user = userEvent.setup()
+    renderAtHash("calendar")
+
+    await user.selectOptions(screen.getByLabelText("Он сонгох"), "2028")
+    await user.selectOptions(screen.getByLabelText("Сар сонгох"), "0")
+    await user.click(screen.getByRole("button", { name: /15/ }))
+    await user.selectOptions(screen.getByLabelText("Түрээслэх хоног"), "3")
+    await user.selectOptions(screen.getByLabelText("Эхлэх цаг"), "09:30")
+    await user.selectOptions(screen.getByLabelText("Дуусах цаг"), "17:00")
+
+    expect(screen.getByText("2028.01.15")).toBeInTheDocument()
+    expect(screen.getByText("2028.01.18")).toBeInTheDocument()
+    expect(screen.getByLabelText("Эхлэх цаг")).toHaveValue("09:30")
+    expect(screen.getByLabelText("Дуусах цаг")).toHaveValue("17:00")
+    expect(screen.getAllByText("3 өдөр")).toHaveLength(2)
+  })
 
   // Check-in хугацааны мэдэгдлээс буцаалтын шалгах хуудас нээгдэнэ.
   it("opens the return checklist from notification history", async () => {
@@ -772,7 +853,7 @@ describe("MobileOpsApp screens", () => {
       "notifications",
     ].flatMap((source) =>
       [
-        ["Нүүр", "home", "Өглөөний мэнд, Менежер"],
+        ["Нүүр", "home", "Өдрийн мэнд, Менежер"],
         ["Төхөөрөмж", "equipment", "Тоног төхөөрөмж"],
         ["QR", "scanner", "QR код уншуулах"],
         ["Мэдэгдэл", "notifications", "Мэдэгдэл ба түүх"],
@@ -826,7 +907,55 @@ describe("MobileOpsApp screens", () => {
     },
   )
 
-  // Website сонголт зөвхөн callback өгсөн үед харагдаж, callback-ийг ажиллуулна.
+  it("keeps the home notifications shortcut visible in day mode", async () => {
+    const user = await renderAuthenticatedRoute(
+      "home",
+      authenticatedDashboard,
+      "renter",
+    )
+    const shortcut = document.querySelector(".home-notifications-shortcut")
+    if (!shortcut) {
+      throw new Error("Home notifications shortcut was not rendered")
+    }
+
+    expect(shortcut).toHaveClass("bg-[#f3f7f8]", "text-[#14212a]")
+    expect(shortcut?.querySelector("img")).toHaveClass("brightness-0")
+
+    await user.click(shortcut)
+    expect(
+      screen.getByRole("heading", { name: "Мэдэгдэл ба түүх" }),
+    ).toBeInTheDocument()
+  })
+
+  it.each([
+    ["renter", "Түрээслэгч"],
+    ["manager", "Менежер"],
+    ["fixer", "Засварчин"],
+  ] as const)(
+    "shows database profile details for the %s account",
+    async (role, roleLabel) => {
+      const user = await renderAuthenticatedRoute(
+        "home",
+        authenticatedDashboard,
+        role,
+      )
+
+      await user.click(screen.getByRole("button", { name: "Миний профайл" }))
+
+      expect(
+        screen.getByRole("heading", { name: "Миний профайл" }),
+      ).toBeInTheDocument()
+      expect(screen.getByText("Бүртгэлийн төрөл").parentElement).toHaveTextContent(
+        roleLabel,
+      )
+      expect(screen.getByText("Example Co")).toBeInTheDocument()
+      expect(screen.getByText("99128044")).toBeInTheDocument()
+      expect(screen.getByText("test@example.com")).toBeInTheDocument()
+      expect(screen.getByText(`${role}-99128044`)).toBeInTheDocument()
+    },
+  )
+
+  // Вэбсайтын нүүр хуудасны товч callback өгсөн үед харагдаж, callback-ийг ажиллуулна.
   it("calls the optional website callback from the home screen", async () => {
     const onBackToWebsite = vi.fn()
     const user = await renderAuthenticatedRoute(
@@ -836,7 +965,9 @@ describe("MobileOpsApp screens", () => {
       onBackToWebsite,
     )
 
-    await user.click(screen.getByRole("button", { name: "Website" }))
+    await user.click(
+      screen.getByRole("button", { name: "Вэбсайтын нүүр хуудас" }),
+    )
 
     expect(onBackToWebsite).toHaveBeenCalledOnce()
   })
@@ -917,8 +1048,8 @@ describe("MobileOpsApp screens", () => {
         }),
       )
 
-      expect(screen.getByText(`10.${day} · 08:00`)).toBeInTheDocument()
-      expect(screen.getByText(`10.${nextDay} · 18:00`)).toBeInTheDocument()
+      expect(screen.getByText(`2026.10.${day}`)).toBeInTheDocument()
+      expect(screen.getByText(`2026.10.${nextDay}`)).toBeInTheDocument()
     },
   )
 
@@ -1162,6 +1293,8 @@ describe("MobileOpsApp screens", () => {
       },
     })
     renderAtHash("login")
+    await user.click(screen.getByRole("button", { name: "Ажилтан нэвтрэх" }))
+    await user.click(screen.getByRole("button", { name: /Менежер Тайлан/ }))
     await user.click(screen.getByRole("button", { name: "Менежерээр нэвтрэх" }))
     await waitFor(() => expect(api.getDashboard).toHaveBeenCalledOnce())
     await user.click(screen.getByRole("button", { name: "Гарах" }))
@@ -1172,7 +1305,7 @@ describe("MobileOpsApp screens", () => {
     })
 
     expect(
-      screen.getByRole("heading", { name: "Хэрэглэгчийн төрөл" }),
+      screen.getByRole("heading", { name: "Түрээслэгчийн нэвтрэх" }),
     ).toBeInTheDocument()
     expect(window.location.hash).toBe("#login")
   })
@@ -1201,6 +1334,8 @@ describe("MobileOpsApp screens", () => {
       },
     })
     renderAtHash("login")
+    await user.click(screen.getByRole("button", { name: "Ажилтан нэвтрэх" }))
+    await user.click(screen.getByRole("button", { name: /Менежер Тайлан/ }))
     await user.click(screen.getByRole("button", { name: "Менежерээр нэвтрэх" }))
     await waitFor(() => expect(api.getDashboard).toHaveBeenCalledOnce())
     await user.click(screen.getByRole("button", { name: "Гарах" }))
@@ -1211,7 +1346,7 @@ describe("MobileOpsApp screens", () => {
     })
 
     expect(
-      screen.getByRole("heading", { name: "Хэрэглэгчийн төрөл" }),
+      screen.getByRole("heading", { name: "Түрээслэгчийн нэвтрэх" }),
     ).toBeInTheDocument()
     expect(window.location.hash).toBe("#login")
   })
