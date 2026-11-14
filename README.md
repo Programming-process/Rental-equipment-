@@ -43,6 +43,19 @@ npm start
 
 When the app is built, the Express server serves the generated Vite files from the `dist/` folder and keeps the `/api/*` routes available.
 
+## Tests
+
+Test files and shared test setup are kept in `tests/`.
+
+```bash
+pnpm test           # backend API tests and frontend unit tests
+pnpm test:unit      # frontend unit tests only
+pnpm test:coverage  # frontend coverage report
+```
+
+For new behavior, use Red-Green-Refactor: add a test that fails for the missing behavior, implement the smallest change that makes it pass, then refactor and rerun the tests.
+The coverage command enforces 100% statement, function, and line coverage for the app modules exercised by the suite; branch coverage is reported as a metric.
+
 ## Docker deployment
 
 This project now includes a Dockerfile so you can push it to GitHub and deploy on Render as a Docker Web Service.
@@ -101,6 +114,7 @@ Render injects the port automatically in some cases, but this app is configured 
 ```bash
 src/                # React app
 server/             # Express API
+tests/              # frontend unit tests, backend API tests, and test setup
 public/             # static assets
 package.json        # app scripts and dependencies
 vite.config.ts      # Vite config with API proxy for local dev

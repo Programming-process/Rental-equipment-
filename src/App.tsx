@@ -1,5 +1,6 @@
 import { useState } from "react";
 import MobileOpsApp from "./MobileOpsApp";
+import NpmSecurityGuide from "./NpmSecurityGuide";
 
 const fleet = [
   {
@@ -42,10 +43,14 @@ const stats = [
 ];
 
 export default function App() {
-  const [route, setRoute] = useState<"dashboard" | "mobile">("dashboard");
+  const [route, setRoute] = useState<"dashboard" | "mobile" | "npm-security">("dashboard");
 
   if (route === "mobile") {
     return <MobileOpsApp onBackToWebsite={() => setRoute("dashboard")} />;
+  }
+
+  if (route === "npm-security") {
+    return <NpmSecurityGuide onBack={() => setRoute("dashboard")} />;
   }
 
   return (
@@ -66,6 +71,13 @@ export default function App() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <button
+              className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10"
+              onClick={() => setRoute("npm-security")}
+              type="button"
+            >
+              npm security
+            </button>
             <button
               className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10"
               onClick={() => setRoute("dashboard")}

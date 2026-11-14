@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { api } from "./lib/api";
+import { api, type UserRole } from "./lib/api";
 
 const assetPathPrefix = "/assets";
 const imgScanLine = `${assetPathPrefix}/cc583.svg`;
@@ -40,14 +40,14 @@ export default function MobileLogin({
     message: string;
     user: {
       id: string;
-      role: Role;
+      role: UserRole;
       phone: string;
       name: string;
       company: string;
     };
     session: {
       token: string;
-      role: Role;
+      role: UserRole;
       expiresAt: string;
     };
   }) => void;
