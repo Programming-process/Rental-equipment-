@@ -129,4 +129,4 @@ render.yaml         # Render deployment configuration
 - The database stores account credentials, hashed session tokens, and short-lived verification challenges. Dashboard equipment data remains sample data.
 
 ##NOTES
-https://docs.google.com/document/d/164UiklNqHUOLI5gsAqDS3K1AqN24cn7iFNl82y-TWHQ/edit?tab=t.0
+https://docs.google.com/document/d/1hfwc3QhKvPXcPAYTpc-VPqFWlpHFA3iaJMNPgIMcyV8/edit?usp=sharing
