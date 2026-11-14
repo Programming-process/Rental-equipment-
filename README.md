@@ -128,4 +128,4 @@ render.yaml         # Render deployment configuration
 - For production, swap the in-memory data source for Postgres, MongoDB, or another persistent store.
 
 ##NOTES
-https://docs.google.com/document/d/164UiklNqHUOLI5gsAqDS3K1AqN24cn7iFNl82y-TWHQ/edit?tab=t.0
+https://docs.google.com/document/d/1hfwc3QhKvPXcPAYTpc-VPqFWlpHFA3iaJMNPgIMcyV8/edit?usp=sharing
