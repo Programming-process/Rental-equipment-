@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs"
 import { cleanup, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
@@ -18,6 +19,18 @@ describe("App routes", () => {
 
     expect(artwork).toHaveLength(rentalCatalog.length)
     expect(new Set(artwork).size).toBe(rentalCatalog.length)
+  })
+
+  it("points every catalog photo at a file that exists in public/", () => {
+    const photos = rentalCatalog
+      .map((item) => item.image)
+      .filter((image) => image.endsWith(".jpg"))
+
+    expect(photos.length).toBeGreaterThan(0)
+    for (const photo of photos) {
+      const relative = photo.replace(/^.*?assets\//, "public/assets/")
+      expect(existsSync(relative), relative).toBe(true)
+    }
   })
 
   it("toggles and persists night mode across the website and login", async () => {

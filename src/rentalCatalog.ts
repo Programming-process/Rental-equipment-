@@ -250,16 +250,40 @@ const createEquipmentArtwork = (
 export const USD_TO_MNT_RATE = 3599.06
 export const USD_TO_MNT_AS_OF = "2026-11-13"
 
+// Real photos live in public/assets/catalog/<slug>.jpg (800x450, from Wikimedia
+// Commons). The slug is the English name lowercased with non-alphanumerics → "-".
+// Items without a photo yet fall back to the generated emoji artwork.
+const equipmentPhotoSlugs = new Set([
+  "air-compressor", "angle-grinder", "bulldozer", "caliper", "car", "chainsaw",
+  "chairs-tables", "circular-saw", "concrete-mixer-truck", "crane",
+  "demolition-hammer-jackhammer", "dump-truck", "excavator", "fire-extinguisher",
+  "floodlight", "floor-saw", "generator", "grader", "hammer-drill-rotary-hammer",
+  "heater", "jigsaw", "ladder", "level", "loader", "mini-excavator", "minibus",
+  "motorcycle-atv", "mower", "multimeter", "pickup", "ppe-set", "pressure-washer",
+  "projector", "road-roller", "router", "sander", "scaffolding", "snow-blower",
+  "sound-system", "sprayer", "suv", "thermal-camera", "tractor", "trailer",
+  "water-pump", "welding-machine", "wheelbarrow-hand-truck", "wood-chipper",
+  "drill", "core-drill", "cordless-screwdriver-impact-driver", "gas-welder",
+  "heat-gun", "tile-cutter", "forklift", "concrete-mixer", "concrete-vibrator",
+  "truck", "industrial-vacuum", "safety-barrier", "tent", "planer",
+])
+
+const toPhotoSlug = (englishName: string) =>
+  englishName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+
 export const rentalCatalog = catalogGroups.flatMap((group) =>
   group.items.map(([name, englishName], index) => {
     const emoji = equipmentVisuals[englishName] ?? "🧰"
+    const slug = toPhotoSlug(englishName)
     return {
       id: `${group.category}-${index}`,
       category: group.category,
       dailyUsdRange: group.dailyUsdRange,
       name,
       englishName,
-      image: createEquipmentArtwork(name, group.category, emoji, index),
+      image: equipmentPhotoSlugs.has(slug)
+        ? `${import.meta.env.BASE_URL}assets/catalog/${slug}.jpg`
+        : createEquipmentArtwork(name, group.category, emoji, index),
     }
   }),
 )

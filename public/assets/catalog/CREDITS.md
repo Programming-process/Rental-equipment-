@@ -1,0 +1,67 @@
+# Catalog photo credits
+
+All photos are from Wikimedia Commons, cropped/resized to 800x450.
+Each file's author and license are listed on its Commons page.
+
+- `air-compressor.jpg`: https://commons.wikimedia.org/wiki/File:AirCompressorHusky.JPG
+- `angle-grinder.jpg`: https://commons.wikimedia.org/wiki/File:AngleGrinder.jpg
+- `bulldozer.jpg`: https://commons.wikimedia.org/wiki/File:CatD9T.jpg
+- `caliper.jpg`: https://commons.wikimedia.org/wiki/File:Caliper_detail_view.jpeg
+- `car.jpg`: https://commons.wikimedia.org/wiki/File:Toyota_Camry_2.5_Hybrid_Ascent_Sport_%28IX%29_%E2%80%93_f_02012026.jpg
+- `chainsaw.jpg`: https://commons.wikimedia.org/wiki/File:Chainsaw.JPG
+- `chairs-tables.jpg`: https://commons.wikimedia.org/wiki/File:Folding_table.jpg
+- `circular-saw.jpg`: https://commons.wikimedia.org/wiki/File:USMC-02963.jpg
+- `concrete-mixer-truck.jpg`: https://commons.wikimedia.org/wiki/File:Modern_Titan_Volumetric_Mixer.jpg
+- `concrete-mixer.jpg`: https://commons.wikimedia.org/wiki/File:Concrete_Mixture_at_a_construction_site.jpg
+- `concrete-vibrator.jpg`: https://commons.wikimedia.org/wiki/File:P14Eactie1_%28cropped_to_concrete_vibrator%29.JPG
+- `cordless-screwdriver-impact-driver.jpg`: https://commons.wikimedia.org/wiki/File:Craftsman_C3_19.2v_Impact_Driver_%285497647182%29.jpg
+- `core-drill.jpg`: https://commons.wikimedia.org/wiki/File:Drill_diamond_core.jpg
+- `crane.jpg`: https://commons.wikimedia.org/wiki/File:20100225-Liebherr_LTM_1200-5.jpg
+- `demolition-hammer-jackhammer.jpg`: https://commons.wikimedia.org/wiki/File:Pneumatic_drill.jpeg
+- `drill.jpg`: https://commons.wikimedia.org/wiki/File:Cordless_Drill_%288559707469%29.jpg
+- `dump-truck.jpg`: https://commons.wikimedia.org/wiki/File:Freightliner_M2_106_6x4_2014_%2814240376744%29.jpg
+- `excavator.jpg`: https://commons.wikimedia.org/wiki/File:Excavator_Postiguet_Beach_2.jpg
+- `fire-extinguisher.jpg`: https://commons.wikimedia.org/wiki/File:Wheeled_fire_extinguisher.jpg
+- `floodlight.jpg`: https://commons.wikimedia.org/wiki/File:Floodlights.jpg
+- `floor-saw.jpg`: https://commons.wikimedia.org/wiki/File:Concrete_saw2.jpg
+- `forklift.jpg`: https://commons.wikimedia.org/wiki/File:Dep%C3%B3sito_.png
+- `gas-welder.jpg`: https://commons.wikimedia.org/wiki/File:Oxy-fuel_welding_MINI_DM_273.jpg
+- `generator.jpg`: https://commons.wikimedia.org/wiki/File:Engine_Generator_Cart.jpg
+- `grader.jpg`: https://commons.wikimedia.org/wiki/File:Grader_2.jpg
+- `hammer-drill-rotary-hammer.jpg`: https://commons.wikimedia.org/wiki/File:Hammer_drill-1.jpg
+- `heat-gun.jpg`: https://commons.wikimedia.org/wiki/File:Hot_air_gun_%281%29.jpg
+- `heater.jpg`: https://commons.wikimedia.org/wiki/File:Carbon_heater.jpg
+- `industrial-vacuum.jpg`: https://commons.wikimedia.org/wiki/File:Numatic_Vacuum_Cleaner_%285254243781%29.jpg
+- `jigsaw.jpg`: https://commons.wikimedia.org/wiki/File:Jigsaw_AccuMaster.jpg
+- `ladder.jpg`: https://commons.wikimedia.org/wiki/File:Ladder.webp
+- `level.jpg`: https://commons.wikimedia.org/wiki/File:Us_land_survey_officer.jpg
+- `loader.jpg`: https://commons.wikimedia.org/wiki/File:Front_end_loader_2.jpg
+- `mini-excavator.jpg`: https://commons.wikimedia.org/wiki/File:20150724_libramont095.JPG
+- `minibus.jpg`: https://commons.wikimedia.org/wiki/File:Jumper_Distribus_%28cropped%29.jpg
+- `motorcycle-atv.jpg`: https://commons.wikimedia.org/wiki/File:Four_wheeler.jpg
+- `mower.jpg`: https://commons.wikimedia.org/wiki/File:Lawn_Mowing_DVIDS119604.jpg
+- `multimeter.jpg`: https://commons.wikimedia.org/wiki/File:YX360TRF%28Sanwa%29.JPG
+- `pickup.jpg`: https://commons.wikimedia.org/wiki/File:Ford_F-150_crew_cab_--_05-28-2011.jpg
+- `planer.jpg`: https://commons.wikimedia.org/wiki/File:Makita_planer_KP0800_%282%29.jpg
+- `ppe-set.jpg`: https://commons.wikimedia.org/wiki/File:Cologne_Germany_Industrial-work-with-Personal-Protective-Equipment-04.jpg
+- `pressure-washer.jpg`: https://commons.wikimedia.org/wiki/File:H%C3%B6gtryckstv%C3%A4tt_-_Pressure_washer_-_Ystad-2011.jpg
+- `projector.jpg`: https://commons.wikimedia.org/wiki/File:Projektor_PGD2870W_firmy_Sharp.jpg
+- `road-roller.jpg`: https://commons.wikimedia.org/wiki/File:John_Deere_roller%2C_U.S._Navy%2C_Camp_Covington%2C_NMCB-133%2C_080928-N-1106H-001.jpg
+- `router.jpg`: https://commons.wikimedia.org/wiki/File:Wood_router_jmc_2005_03_12.jpg
+- `safety-barrier.jpg`: https://commons.wikimedia.org/wiki/File:Construction_Worker_moving_concrete_barrier_DSC_0474.jpg
+- `sander.jpg`: https://commons.wikimedia.org/wiki/File:Random_orbit_sander.jpg
+- `scaffolding.jpg`: https://commons.wikimedia.org/wiki/File:Andamio_de_tres_cuerpos_de_Aneur.jpg
+- `snow-blower.jpg`: https://commons.wikimedia.org/wiki/File:Honda_hs1136_snowblower.jpg
+- `sound-system.jpg`: https://commons.wikimedia.org/wiki/File:White_noise_-_Horn_loudspeakers_at_Brastad_soccer_arena.jpg
+- `sprayer.jpg`: https://commons.wikimedia.org/wiki/File:Folded_spray_boom.jpg
+- `suv.jpg`: https://commons.wikimedia.org/wiki/File:97-01_Jeep_Cherokee.jpg
+- `tent.jpg`: https://commons.wikimedia.org/wiki/File:Marquee_in_Queens_Gardens%2C_Hull_-_geograph.org.uk_-_5519812.jpg
+- `thermal-camera.jpg`: https://commons.wikimedia.org/wiki/File:Passivhaus_thermogram_gedaemmt_ungedaemmt.png
+- `tile-cutter.jpg`: https://commons.wikimedia.org/wiki/File:1era_talladora_antiga_RUBI.tif
+- `tractor.jpg`: https://commons.wikimedia.org/wiki/File:Ford_8N.jpg
+- `trailer.jpg`: https://commons.wikimedia.org/wiki/File:Baset_trailer.jpg
+- `truck.jpg`: https://commons.wikimedia.org/wiki/File:Nufam_2023%2C_Rheinstetten_%28P1130504%29.jpg
+- `water-pump.jpg`: https://commons.wikimedia.org/wiki/File:Jet_pump.jpg
+- `welding-machine.jpg`: https://commons.wikimedia.org/wiki/File:SMAW_welding_machine-2.jpg
+- `wheelbarrow-hand-truck.jpg`: https://commons.wikimedia.org/wiki/File:2008-07-15_Construction_wheelbarrow_at_Duke.jpg
+- `wood-chipper.jpg`: https://commons.wikimedia.org/wiki/File:Woodchipper.webp
